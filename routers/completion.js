@@ -1,12 +1,38 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.send('User Index');
-});
+const { Chat } = require("../services/chat.js");
 
-router.get('/:userId', (req, res) => {
-  res.send(`User ID: ${req.params.userId}`);
+
+router.post("/", async (req, res) => {
+  try {
+    const { message } = req.body;
+    console.log(message)
+    
+    const chat = new Chat();
+    chat.create()
+      .then(() => {
+        res.json(chat.completion.data.choices);
+        console.log(chat.completion.data.choices);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Internal server error");
+      });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal server error");
+  }
+  question(message).then(
+    console.log(chat.messages)
+  )
+  // while(True){
+  //   chat.say(){
+
+  //   }
+  // }
+  
 });
 
 module.exports = router;
+//req.session.destroy();
