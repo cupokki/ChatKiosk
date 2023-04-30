@@ -1,44 +1,34 @@
 const express = require('express');
 const router = express.Router();
 
-const { Chat } = require("../services/chat.js");
+const Chat = require("../services/chat.js");
+
+
+//이는 추후에 세션으로 구현되어야함
+//id와 같이 저장?
 
 
 
+
+let task_queue; //동시에 여러요청들어오면 에러 반환-> 파이프라이닝 해야함
 
 //첫 요청-> chat생성-> 초기 스크립트 반환해야함
+//요청에 대한 반환값으로 text
 router.post("/", async (req, res) => {
-  // try {
-    // const { message } = req.body;
-    // console.log(message)
-
-
-    //보안성 검토
-    // req.session.chat = chat;
-
-    const chat = new Chat();
-
-    //chat 객체는 세션마다 존재
-  //   chat.create()
-  //     .then((result) => {
-  //       // let data = chat.messages[chat.masseages.length - 1];
-  //       console.log(result);
-  //       // console.log(chat.messages);
-  //       // res.json(chat.messages);
-  //       // return 
-  //     })
-  //     .catch((result) => {
-  //       console.error(result);
-  //       res.status(500).send("Internal server error");
-  //     })
-    
-  // } catch (err) {
-  //   console.error(err);
-  //   res.status(500).send("Internal server error");
-  chat.create()//.then(data=>{console.log(data)});
-    // console.log(chat.create());
-  // }
+  let msg = req.body.message;
+  let chat = req.session.chat;
+  if(!chat){
+    req.session.chat = Chat.create();
+    chat = req.session.chat;
+  }
+  console.log(chat);
+  Chat.request(chat, msg)
+    .then(data => {
+      res.json(data);
+    })
+    .catch(err => {
+      console.error(err);
+    })
 });
 
 module.exports = router;
-//req.session.destroy();
