@@ -11,12 +11,30 @@
  * 
  * 결론은 이 객체는 서버단에서 객체의 정보를 유지하기 위한 클래스이며
  * chat과 생명주기가 같다.
+ * 근데 세션에 이걸 저장 할 수 있나? 없잖아
+ * 일단 필드만 저장 시키자
  */
 class Order{
-    constructor(){
-        this.item_list = []
-        this.requirement = ""
+    constructor(shop_type){
+        this.prompt = `You're ${shop_type} staff. first greeting. talk with just korean. as short as possible answer`
+        this.dialogue = []
+        this.menu = ``
+        this.cart = ``
+        this.requirement = ``
+    }
 
-        
+    //임시로 스태틱
+     getOrder(){        
+        return {
+            //Order's field
+            prompt : this.prompt,
+            dialogue : this.dialogue,
+            menu : this.menu,
+            cart : this.cart,
+            requirement : this.requirement
+        }
     }
 }
+    
+    
+module.exports = Order;

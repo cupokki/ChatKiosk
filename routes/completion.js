@@ -3,6 +3,7 @@ const router = express.Router();
 
 const completionService = require("../services/completionService");
 
+// router.route("/").post(completionService.createOrder);
 router.route("/").post(completionService.getCompletion);
 
 module.exports = router;
