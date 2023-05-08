@@ -7,7 +7,7 @@
 //api 키 여러개로 스케줄링
 //토큰을 다소모하면 새로운 order로 내용을 전부 옮겨서 진행하자
 
-const {openai, openai2} = require("../../utils/openaiApi")
+const { openai, openai2 } = require("../../utils/openaiApi")
 
 //TODO: 대회의 state를 정해서 필요한 prompt를 교체하자
 //state를 결정짓는 것은 command를 통해서
@@ -24,38 +24,41 @@ const Agent = {
      * @param {String} str 
      * @returns 
     */
-   extractCommand : async (order, str)=>{
-       
-       menu = JSON.stringify(order.menu)
-       test_prompt = `
-       Convert Question to command. You Must consider conversation and  You Must follow example. 
+    extractCommand: async (order, str) => {
+
+        menu = JSON.stringify(order.menu)
+        test_prompt = `
+       Convert Question to command. You Must consider conversation and  You Must follow example. as short as possible.
        - If second arg is exist, the arg declare follow list [${menu}]
-       if context about add -> a 콜라 1
-       if context about remove -> r 콜라 1
-       if context about update -> s 콜라 2
-       if context about question item information-> i 콜라
-        other context  -> "n"
-       
-       Q:${str}-> A:`
-       
-       const messages =  [{role : "system", content : `${test_prompt}`}]
-       messages.concat(order.dialogue)
-       
-       //TODO: 추후 명령어 추출기로 다른 모델 사용할 수도
-       const completion = await openai.createChatCompletion({
-           model : "gpt-3.5-turbo",
-           messages : messages
-        })
-        //토큰 사용량
-        console.log(completion.data.usage)
+       - If second arg is something similar in the menu, use similar one.
+       if context about add order item-> a item count
+       if context about remove order item-> r item count
+       if context about update order item > s item count
+       if context about question item info -> i item
+        other context  -> n
+        can understand -> e
+        `
         
+        const messages = [{ role: "system", content: `${test_prompt}` },
+        {role : "user", content : `Convert text to command "${str}"->`}]//.concat(order.dialogue)
+        //TODO: 다이얼로그 포함아직 못함, 그래서 그거 줘 이런거 대답 못함
+        //TODO: 추후 명령어 추출기로 다른 모델 사용할 수도
+        
+        const completion = await openai.createChatCompletion({
+            model: "gpt-3.5-turbo",
+            messages: messages
+            // prompt: test_prompt
+        })
+
+        // cmd = completion.data.choices[0].text
         cmd = completion.data.choices[0].message.content
         cmd_line = cmd.split(" ")
         console.log(cmd_line)
         console.log("createCMD", completion.data.usage)
+        order.token += completion.data.usage.total_tokens
         return cmd_line// = [cmd, ...args]
     },
-    
+
     /**
      * 평문을 생성함
      * @param {Order} order
@@ -63,29 +66,38 @@ const Agent = {
      * @param {String} prompt
      * @returns 평문
     */
-    createReply: async (order, req_msg, extra_prompt)=>{
+    createReply: async (order, req_msg, extra_prompt) => {
+        let manual = `If 메뉴 추천 요청 시, 기호나 가격대를 되물을 것`
         const first_prompt =
-            `You're ${"롯데리아"} staff. you can sell ${JSON.stringify(order.menu)}. do not reply unrelated to the order. talk with just korean. as short as possible.
-             `
+            `You're ${"롯데리아"} order staff. menu :  {${JSON.stringify(order.menu)}}.
+             Never reply unrelated to the order.
+             You're job is just take order,DO NOT SERVE ITEM.
+             Talk only korean.
+             You NEVER contain menu list in reply.
+             as short as possible.
+             ${manual}
+            `
+        let test_prompt = first_prompt + extra_prompt
+        
+        
+        const messages = [{ role: "system", content: `${test_prompt}` }].concat(order.dialogue)
+        messages.push({ role: "user", content: req_msg })
         //TODO: menu와 test_prompt 하드코딩된 요소임
         const completion = await openai2.createChatCompletion({
-            model : "gpt-3.5-turbo",
-            messages : [
-                { role : "system", content : first_prompt+extra_prompt},
-                { role : "user", content : req_msg}
-        
-            ] 
+            model: "gpt-3.5-turbo",
+            messages: messages
         })
         console.log("createReply", completion.data.usage)
+        order.token += completion.data.usage.total_tokens
         return completion.data.choices[0].message.content
     },
 
 
     //TODO:삭제예정
-    checkItem : async (order, item) => {
+    checkItem: async (order, item) => {
         const completion = await openai.createCompletion({
-            model : "text-davinci-003",
-            prompt : `${item} is in the ${JSON.stringify(order.menu)} if nothing match, return "n" ->`
+            model: "text-davinci-003",
+            prompt: `${item} is in the ${JSON.stringify(order.menu)} if nothing match, return "n" ->`
         })
         console.log(completion.data.choices[0].text)
         // return 

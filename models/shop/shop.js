@@ -9,7 +9,6 @@ const Shop = {
     // address
     // callnumber
     
-
     getMenu : (name)=>{
         mysql.query(
             `SELECT Store.name, Menu.name FROM Store, Menu WHERE Store.name = "${name}" AND Menu.storename = Store.name`,

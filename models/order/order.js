@@ -18,10 +18,11 @@ class Order{
     constructor(){
         this.dialogue = []
         // this.menu = [] // query menu list??
-        this.menu = [`불고기버거`, `핫크리스피버거`, `펩시콜라`, `ㅁㄴㅇ`,`ㄴㅇ`,`ㅇ`,`ㅁ`,`ㅁㅋㅌㅊ`,`ㅂㅈ`,`ㅈㄷㄳ`,`ㄷㄱㅌㅊㅍ`,`ㄴㅇㄹ`,`ㄷㄱㅂ` ,`ㄹㄹㄴㅇㅁㄹ`] // query menu list?? TODO:하드코딩
+        this.menu = [`불고기버거`, `핫크리스피버거`, `펩시콜라`, `감자튀김`, `데리버거`,`더블엑스버거`,`ㅁ`,`ㅁㅋㅌㅊ`,`ㅂㅈ`,`ㅈㄷㄳ`,`ㄷㄱㅌㅊㅍ`,`ㄴㅇㄹ`,`ㄷㄱㅂ` ,`ㄹㄹㄴㅇㅁㄹ`] // query menu list?? TODO:하드코딩
         this.cart = []
         // this.requirement = ``//요청사항보단 option 속성을 검토해보자
         this.step = 0;
+        this.token = 0;
     }
      getOrder(){        
         return {
@@ -31,7 +32,8 @@ class Order{
             menu : this.menu,
             cart : this.cart,
             // requirement : this.requirement,
-            step : this.step
+            step : this.step,
+            token : this.token
         }
     }
     setOrder(arg){
@@ -40,7 +42,9 @@ class Order{
         this.menu = arg.menu
         this.cart = arg.cart
         // this.requirement = arg.requirement
-        this.step = arg.step;
+        this.step = arg.step
+        this.token - arg.token
+
     }
     
 }

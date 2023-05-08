@@ -112,10 +112,10 @@ exports.getOrderRelpy =  async(req, res, next) => {
         const cmd = await agent.extractCommand(order, msg)//extract command from request message
         let extra_prompt
         switch(cmd[0]){ //execute command 
-            case 'i':
+            case `i`:
                 //search command[1]
                 extra_prompt = command.getInfo(order, cmd)
-                console.log(extra_prompt)
+                break
                 //activate menu
                 
             case `a`:
@@ -123,19 +123,22 @@ exports.getOrderRelpy =  async(req, res, next) => {
                 //activate menu
                 extra_prompt = command.addItem(order, cmd)
                 //add command[1]
+                break
             case `r`:
-                
+                break
             case `s`:
-                
-            default: // `n`
+                break
+            case `n`:
+                break
+            default: // `e`
                 extra_prompt = `you didn't understand. ask to user again`
+                break
                 
         }
-
         //TODO : 특정 명령어에만 menu, cart 활성화
         const reply = await agent.createReply(order,msg, extra_prompt)//order.prompt) 
         // console.log(reply)
-
+        
         //최근 2쌍의 컨텐트만 dialogue에 보관하자
         //다이얼로그는 
         
@@ -144,18 +147,19 @@ exports.getOrderRelpy =  async(req, res, next) => {
             order.dialogue.shift()
         }
         
-        order.dialogue.push({role : "user", content : msg})
+        order.dialogue.push({role : "user", content : msg})//reply생성 위에 존재시 429에러시 문제
         order.dialogue.push({role : "assistant", content : reply})
-        
-        console.log(order.dialogue)
 
         order.step += 1;
         req.session.order = order.getOrder()// save
         // console.log(order.getOrder())
-        console.log(order.cart)
+        console.log("cart : ", order.cart)
+        console.log("step : ", order.step)
         res.json({
             reply : reply,
-            command : cmd
+            command : cmd,
+            token : order.token,
+            step : order.step
         })
         
     }
