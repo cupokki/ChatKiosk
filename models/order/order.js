@@ -15,15 +15,14 @@
  * 일단 필드만 저장 시키자
  */
 class Order{
-    constructor(shop_type){
-        this.prompt = `You're ${shop_type} staff. first greeting. talk with just korean. as short as possible answer`
+    constructor(){
         this.dialogue = []
-        this.menu = ``
-        this.cart = ``
-        this.requirement = ``
+        // this.menu = [] // query menu list??
+        this.menu = [`불고기버거`, `핫크리스피버거`, `펩시콜라`, `ㅁㄴㅇ`,`ㄴㅇ`,`ㅇ`,`ㅁ`,`ㅁㅋㅌㅊ`,`ㅂㅈ`,`ㅈㄷㄳ`,`ㄷㄱㅌㅊㅍ`,`ㄴㅇㄹ`,`ㄷㄱㅂ` ,`ㄹㄹㄴㅇㅁㄹ`] // query menu list?? TODO:하드코딩
+        this.cart = []
+        // this.requirement = ``//요청사항보단 option 속성을 검토해보자
+        this.step = 0;
     }
-
-    //임시로 스태틱
      getOrder(){        
         return {
             //Order's field
@@ -31,9 +30,19 @@ class Order{
             dialogue : this.dialogue,
             menu : this.menu,
             cart : this.cart,
-            requirement : this.requirement
+            // requirement : this.requirement,
+            step : this.step
         }
     }
+    setOrder(arg){
+        this.prompt = arg.prompt
+        this.dialogue = arg.dialogue
+        this.menu = arg.menu
+        this.cart = arg.cart
+        // this.requirement = arg.requirement
+        this.step = arg.step;
+    }
+    
 }
     
     

@@ -1,6 +1,7 @@
-const context = {
-    t : "",
-    c : ""
-}
+//API 요청에 대해 반환될 형태
 
-module.exports
+
+// const content = {
+//     reply : "",
+//     command : ""
+// }

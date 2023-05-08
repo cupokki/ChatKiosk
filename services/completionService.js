@@ -73,14 +73,9 @@
 // };
 const agent = require("../models/agent/agent")
 const Order = require("../models/order/order")
+// const Shop = require("../models/shop/shop")
+const command = require("../models/command")
 const openai = require("../utils/openaiApi")
-
-
-//에이전트는 어케야할까...
-//에이전트는 필드가 필요하나?
-//아! 에이전트는 필드를 가질 필요가 없다.
-// 그렇다면 클래스는 옳은가?
-
 
 
 exports.createOrder = (req, res, next)  => {
@@ -94,29 +89,75 @@ exports.createOrder = (req, res, next)  => {
     console.log("Create Order")
     req.session.order = {}
     next()
-
 }
 
-exports.getCompletion =  async(req, res, next) => {
+exports.getOrderRelpy =  async(req, res, next) => {
+    // Shop.getMenu("롯데리아")
 
-    
+    const msg = req.body.msg
+    const order = new Order()//TODO:첫번째 요청에서 가게의 정보를 받아봐서 초기화 해야함
     if(req.session.order  === undefined){
-        //create order
         console.log("Create Order")
         //가게정보를 넘겨주자
-        test = new Order("일반음식점")
-        req.session.order = test.getOrder()
     }else{
-        console.log("Order already exist")
+        order.setOrder(req.session.order)
     }
 
-//    TODO:인자 변수로 빼기
+    if(order.step >= 30){
+        //terninate
+        //next()
+    }
+
     try {
-        const data = await agent.createResponse(req.body.msg, req.session.order.prompt)//order.prompt) 
-        console.log(data) // output : undefined
-        const command = await agent.extractCommand(req.body.msg)
-        res.json(command)
-           
+        const cmd = await agent.extractCommand(order, msg)//extract command from request message
+        let extra_prompt
+        switch(cmd[0]){ //execute command 
+            case 'i':
+                //search command[1]
+                extra_prompt = command.getInfo(order, cmd)
+                console.log(extra_prompt)
+                //activate menu
+                
+            case `a`:
+                //command[1] is exist
+                //activate menu
+                extra_prompt = command.addItem(order, cmd)
+                //add command[1]
+            case `r`:
+                
+            case `s`:
+                
+            default: // `n`
+                extra_prompt = `you didn't understand. ask to user again`
+                
+        }
+
+        //TODO : 특정 명령어에만 menu, cart 활성화
+        const reply = await agent.createReply(order,msg, extra_prompt)//order.prompt) 
+        // console.log(reply)
+
+        //최근 2쌍의 컨텐트만 dialogue에 보관하자
+        //다이얼로그는 
+        
+        if (order.dialogue.length > 3){
+            order.dialogue.shift()
+            order.dialogue.shift()
+        }
+        
+        order.dialogue.push({role : "user", content : msg})
+        order.dialogue.push({role : "assistant", content : reply})
+        
+        console.log(order.dialogue)
+
+        order.step += 1;
+        req.session.order = order.getOrder()// save
+        // console.log(order.getOrder())
+        console.log(order.cart)
+        res.json({
+            reply : reply,
+            command : cmd
+        })
+        
     }
     catch(err){
         next(err);
@@ -124,7 +165,7 @@ exports.getCompletion =  async(req, res, next) => {
 };
 
 
-exports.terminataOrder = (req, res, next)  => {
+exports.terminateOrder = (req, res, next)  => {
 
 
 }

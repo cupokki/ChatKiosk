@@ -8,4 +8,11 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-module.exports = openai;
+const configuration2 = new Configuration({
+  apiKey: `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`
+});
+const openai2 = new OpenAIApi(configuration);
+
+module.exports = {openai, openai2};
+
+
