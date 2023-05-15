@@ -73,39 +73,72 @@
 // };
 const agent = require("../models/agent/agent")
 const Order = require("../models/order/order")
-// const Shop = require("../models/shop/shop")
+const Shop = require("../models/shop/shop")
 const command = require("../models/command")
-const openai = require("../utils/openaiApi")
+const {openai} = require("../utils/openaiApi")
 
-
-exports.createOrder = (req, res, next)  => {
-    //라우터에 달아두자
-    const order = req.session.order 
-    if(order){
-        console.log("Order already exist")
-        next()
+let test =[{role : 'system' , content : '테스트 테스트'}]
+let step = 1
+let sum = 0;
+exports.test = async (req, res, next) => {
+    try{
+        msg = req.body.msg 
+        test.push({role : "user", content : msg})//reply생성 위에 존재시 429에러시 문제
+        
+        const completion = await openai.createChatCompletion({
+            model: "gpt-3.5-turbo",
+            messages: test
+        })
+        
+        id = completion.data.id
+        reply = completion.data.choices[0].message.content
+        test.push({role : "assistant", content : id})
+        console.log(completion.data.usage, test)
+        res.status(200).send(reply)
+    }catch(err){
+        console.error(err)
     }
-    //create order
-    console.log("Create Order")
-    req.session.order = {}
-    next()
 }
 
-exports.getOrderRelpy =  async(req, res, next) => {
+exports.createOrderSession = async(req, res, next)  => {
+    //라우터에 달아두자
+    let shop_id, shop_name;
+    if(!(shop_id = req.body.shop_id)){
+        next('There is no id')
+
+    }
+    try{
+        data = await Shop.getMenu(shop_id)
+        console.log(data)
+    }catch(e){
+        throw e;
+    }
+
+    const order = {
+        menu : data,
+        step : 0,
+        state : "greeting",
+        dialogue : []
+    }
+
+    //create order
+    req.session.order = order
+    res.status(200).send('')
+}
+
+exports.createOrderCompletion =  async(req, res, next) => {
     // Shop.getMenu("롯데리아")
 
     const msg = req.body.msg
-    const order = new Order()//TODO:첫번째 요청에서 가게의 정보를 받아봐서 초기화 해야함
-    if(req.session.order  === undefined){
-        console.log("Create Order")
-        //가게정보를 넘겨주자
-    }else{
-        order.setOrder(req.session.order)
-    }
+    const order = req.session.order
 
+    if(!order){
+        next('There is no order')
+    }
     if(order.step >= 30){
         //terninate
-        //next()
+        req.session.order = null;
+        next("Too many dialogue")
     }
 
     try {
@@ -151,7 +184,7 @@ exports.getOrderRelpy =  async(req, res, next) => {
         order.dialogue.push({role : "assistant", content : reply})
 
         order.step += 1;
-        req.session.order = order.getOrder()// save
+        req.session.order = order
         // console.log(order.getOrder())
         console.log("cart : ", order.cart)
         console.log("step : ", order.step)

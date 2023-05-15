@@ -3,8 +3,9 @@ const router = express.Router();
 
 const completionService = require("../services/completionService");
 
-// router.route("/").post(completionService.createOrder);
-router.route("/").post(completionService.getOrderRelpy);
-// router.route("/").post(completionService.terminateCompletion);
+router.route("/").post(completionService.createOrderCompletion);
+router.route("/new-session").post(completionService.createOrderSession);
+router.route("/test").post(completionService.test);
+// router.route("/").delete(completionService.terminateCompletion);
 
 module.exports = router;

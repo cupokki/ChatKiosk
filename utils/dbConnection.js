@@ -1,16 +1,16 @@
 const dotenv = require('dotenv')
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
 dotenv.config();
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
   host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_ID,
+  user: process.env.MYSQL_USER,
   password: process.env.MYSQL_PASSWARD,
   database: 'Ai_Kiosk'
 });
 
-connection.connect()//.then(_=>console.log("db connected")).catch(_=>{console.log("err")});
+// connection.connect()
 
 module.exports = connection//, db, collection}
 // connection.end();

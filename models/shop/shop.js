@@ -1,4 +1,4 @@
-const mysql = require("../../utils/dbConnection")
+const connection = require("../../utils/dbConnection")
 
 const Shop = {
     
@@ -9,16 +9,14 @@ const Shop = {
     // address
     // callnumber
     
-    getMenu : (name)=>{
-        mysql.query(
-            `SELECT Store.name, Menu.name FROM Store, Menu WHERE Store.name = "${name}" AND Menu.storename = Store.name`,
-            (error, results, fields) => {
-                if (error) throw error;
-                console.log('The solution is: ', results);
-            }
-        )
-        menu =1
-        return menu
+    getMenu : async (shop_id)=>{
+        
+        const results = await connection.query(
+            `select Menu.name from Menu JOIN Store on Store.id = Menu.store_id Where Store.id = ${shop_id};`)
+        
+        return results[0].map(obj=> obj.name)
     }
-    
 }
+
+module.exports = Shop
+
