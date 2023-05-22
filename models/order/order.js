@@ -18,7 +18,7 @@ class Order{
     constructor(){
         this.dialogue = []
         // this.menu = [] // query menu list??
-        this.menu = [`불고기버거`, `핫크리스피버거`, `펩시콜라`, `감자튀김`, `데리버거`,`더블엑스버거`,`ㅁ`,`ㅁㅋㅌㅊ`,`ㅂㅈ`,`ㅈㄷㄳ`,`ㄷㄱㅌㅊㅍ`,`ㄴㅇㄹ`,`ㄷㄱㅂ` ,`ㄹㄹㄴㅇㅁㄹ`] // query menu list?? TODO:하드코딩
+        this.menu = []
         this.cart = []
         // this.requirement = ``//요청사항보단 option 속성을 검토해보자
         this.step = 0;

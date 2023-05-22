@@ -105,17 +105,19 @@ exports.createOrderSession = async(req, res, next)  => {
     let shop_id, shop_name;
     if(!(shop_id = req.body.shop_id)){
         next('There is no id')
-
     }
     try{
-        data = await Shop.getMenu(shop_id)
-        console.log(data)
+        menu = await Shop.getMenuList(shop_id)
+        console.log(menu)
     }catch(e){
         throw e;
     }
 
     const order = {
-        menu : data,
+        // shop_id : ,
+        // shop_name : ,
+        menu : menu,
+        cart : [{name : `불고기버거`, cnt : 1}],
         step : 0,
         state : "greeting",
         dialogue : []
@@ -142,28 +144,36 @@ exports.createOrderCompletion =  async(req, res, next) => {
     }
 
     try {
-        const cmd = await agent.extractCommand(order, msg)//extract command from request message
+        const cmd_line = await agent.extractCommand(order, msg)//extract command from request message
+        const cmd = cmd_line.shift();
+        const arguments = cmd_line
+
         let extra_prompt
-        switch(cmd[0]){ //execute command 
+
+        switch(cmd){ //execute command 
             case `i`:
                 //search command[1]
-                extra_prompt = command.getInfo(order, cmd)
+                extra_prompt = command.getInfo(order, arguments)
                 break
                 //activate menu
                 
             case `a`:
                 //command[1] is exist
                 //activate menu
-                extra_prompt = command.addItem(order, cmd)
+                extra_prompt = command.addItem(order, arguments)
                 //add command[1]
                 break
             case `r`:
+                // 제거할때 이거 빼주세요 하고 하지않잖아
+                // 그거 말고 저거 주세요 이런식으로 하지.. 그러니까 바꿀 방법을 생각해야하고
+                // 그렇기 때문에 명령어를 보관할 필요도 있어보인다.
+                // 
                 break
-            case `s`:
+            case `l`:
+                extra_prompt = command.getCart(order)
                 break
-            case `n`:
-                break
-            default: // `e`
+            
+            default: // `n`
                 extra_prompt = `you didn't understand. ask to user again`
                 break
                 

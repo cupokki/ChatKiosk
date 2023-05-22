@@ -7,7 +7,7 @@
 //api 키 여러개로 스케줄링
 //토큰을 다소모하면 새로운 order로 내용을 전부 옮겨서 진행하자
 
-const { openai, openai2 } = require("../../utils/openaiApi")
+const { openai, createCompletion } = require("../../utils/openaiApi")
 
 //TODO: 대회의 state를 정해서 필요한 prompt를 교체하자
 //state를 결정짓는 것은 command를 통해서
@@ -31,12 +31,13 @@ const Agent = {
        Convert Question to command. You Must consider conversation and  You Must follow example. as short as possible.
        - If second arg is exist, the arg declare follow list [${menu}]
        - If second arg is something similar in the menu, use similar one.
-       if context about add order item-> a item count
-       if context about remove order item-> r item count
-       if context about update order item > s item count
-       if context about question item info -> i item
+       
+       if context about add order item-> a menu.id count
+       if context about remove order item-> r menu.id count
+       if context about question item info -> i menu.id
+       if context about question cart(order list) -> l
         other context  -> n
-        can understand -> e
+        when you convert, consider past dialogue.
         `
         
         const messages = [{ role: "system", content: `${test_prompt}` },
@@ -44,11 +45,22 @@ const Agent = {
         //TODO: 다이얼로그 포함아직 못함, 그래서 그거 줘 이런거 대답 못함
         //TODO: 추후 명령어 추출기로 다른 모델 사용할 수도
         
-        const completion = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages: messages
-            // prompt: test_prompt
-        })
+        let completion
+        try{
+            completion = await createCompletion({
+                model: "gpt-3.5-turbo",
+                messages: messages
+            })
+            
+        }catch(e){
+            console.log(e)
+        }
+
+        // const completion = await openai.createChatCompletion({
+        //     model: "gpt-3.5-turbo",
+        //     messages: messages
+        //     // prompt: test_prompt
+        // })
 
         // cmd = completion.data.choices[0].text
         cmd = completion.data.choices[0].message.content
@@ -82,11 +94,22 @@ const Agent = {
         
         const messages = [{ role: "system", content: `${test_prompt}` }].concat(order.dialogue)
         messages.push({ role: "user", content: req_msg })
-        //TODO: menu와 test_prompt 하드코딩된 요소임
-        const completion = await openai2.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages: messages
-        })
+
+        // const completion = await openai.createChatCompletion({
+        //     model: "gpt-3.5-turbo",
+        //     messages: messages
+        // })
+        let completion
+        try{
+            completion = await createCompletion({
+                model: "gpt-3.5-turbo",
+                messages: messages
+            })
+            
+        }catch(e){
+            console.log(e)
+        }
+
         console.log("createReply", completion.data.usage)
         order.token += completion.data.usage.total_tokens
         return completion.data.choices[0].message.content
