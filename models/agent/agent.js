@@ -37,7 +37,6 @@ const Agent = {
        if context about question item info -> i menu.id
        if context about question cart(order list) -> l
         other context  -> n
-        when you convert, consider past dialogue.
         `
         
         const messages = [{ role: "system", content: `${test_prompt}` },
