@@ -120,7 +120,8 @@ exports.createOrderSession = async(req, res, next)  => {
         cart : [{name : `불고기버거`, cnt : 1}],
         step : 0,
         state : "greeting",
-        dialogue : []
+        dialogue : [],
+        command_log : []
     }
 
     //create order
@@ -136,14 +137,22 @@ exports.createOrderCompletion =  async(req, res, next) => {
 
     if(!order){
         next('There is no order')
+        // res.status(400).send(err)
+
     }
     if(order.step >= 30){
         //terninate
         req.session.order = null;
-        next("Too many dialogue")
+        res.status(400).send(err)
+        // next("Too many dialogue")
+
     }
 
     try {
+        const tasks = await agent.taskPrioritize(order, msg)
+        console.log(tasks)
+
+
         const cmd_line = await agent.extractCommand(order, msg)//extract command from request message
         const cmd = cmd_line.shift();
         const arguments = cmd_line
@@ -179,12 +188,9 @@ exports.createOrderCompletion =  async(req, res, next) => {
                 
         }
         //TODO : 특정 명령어에만 menu, cart 활성화
-        const reply = await agent.createReply(order,msg, extra_prompt)//order.prompt) 
-        // console.log(reply)
+        const reply = await agent.createReply(order, msg, cmd, extra_prompt)
         
-        //최근 2쌍의 컨텐트만 dialogue에 보관하자
-        //다이얼로그는 
-        
+        //최근 2쌍의 컨텐트만 dialogue에 보관
         if (order.dialogue.length > 3){
             order.dialogue.shift()
             order.dialogue.shift()
@@ -207,7 +213,8 @@ exports.createOrderCompletion =  async(req, res, next) => {
         
     }
     catch(err){
-        next(err);
+        // next(err);
+        res.status(400).send(err)
     }
 };
 

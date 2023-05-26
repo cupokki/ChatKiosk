@@ -18,6 +18,30 @@ const { openai, createCompletion } = require("../../utils/openaiApi")
 // const end_prompt = ``,
 
 const Agent = {
+    
+
+    taskPrioritize : async( order, msg) =>{
+        const messages = []
+        test_prompt = `Make paragraphs as short as possible with task-priority list`
+        messages.push({ role: "system", content: `${test_prompt}` })
+        messages.push({role : "user", content : `"${msg}"->`})//.concat(order.dialogue)
+
+    
+        console.log(messages)
+        let completion
+        try{
+            completion = await createCompletion({
+                model: "gpt-3.5-turbo",
+                messages: messages
+            })
+            
+        }catch(e){
+            console.log(e)
+        }
+        data = completion.data.choices[0].message.content
+        return data
+    },
+
     /**
      * 명령어를 추출함
      * @param {Order} order 
@@ -36,14 +60,17 @@ const Agent = {
        if context about remove order item-> r menu.id count
        if context about question item info -> i menu.id
        if context about question cart(order list) -> l
-        other context  -> n
+        other context  -> n 
+        if 
         `
         
-        const messages = [{ role: "system", content: `${test_prompt}` },
-        {role : "user", content : `Convert text to command "${str}"->`}]//.concat(order.dialogue)
-        //TODO: 다이얼로그 포함아직 못함, 그래서 그거 줘 이런거 대답 못함
-        //TODO: 추후 명령어 추출기로 다른 모델 사용할 수도
-        
+        const messages = []
+        messages.push({ role: "system", content: `${test_prompt}` })
+        messages.concat(order.dialogue)
+        messages.push({role : "user", content : `Convert text to command "${str}"->`})//.concat(order.dialogue)
+        //TODO: 
+    
+        console.log(messages)
         let completion
         try{
             completion = await createCompletion({
@@ -55,13 +82,7 @@ const Agent = {
             console.log(e)
         }
 
-        // const completion = await openai.createChatCompletion({
-        //     model: "gpt-3.5-turbo",
-        //     messages: messages
-        //     // prompt: test_prompt
-        // })
 
-        // cmd = completion.data.choices[0].text
         cmd = completion.data.choices[0].message.content
         cmd_line = cmd.split(" ")
         console.log(cmd_line)
@@ -77,7 +98,7 @@ const Agent = {
      * @param {String} prompt
      * @returns 평문
     */
-    createReply: async (order, req_msg, extra_prompt) => {
+    createReply: async (order, req_msg, cmd, extra_prompt) => {
         let manual = `If 메뉴 추천 요청 시, 기호나 가격대를 되물을 것`
         const first_prompt =
             `You're ${"롯데리아"} order staff. menu :  {${JSON.stringify(order.menu)}}.
@@ -86,18 +107,15 @@ const Agent = {
              Talk only korean.
              You NEVER contain menu list in reply.
              as short as possible.
+             Do not ask again.
              ${manual}
-            `
+             
+            `// + cmd==='l'? `cart :  {${JSON.stringify(order.cart)}}.`:""
         let test_prompt = first_prompt + extra_prompt
-        
-        
         const messages = [{ role: "system", content: `${test_prompt}` }].concat(order.dialogue)
         messages.push({ role: "user", content: req_msg })
 
-        // const completion = await openai.createChatCompletion({
-        //     model: "gpt-3.5-turbo",
-        //     messages: messages
-        // })
+
         let completion
         try{
             completion = await createCompletion({
@@ -107,6 +125,7 @@ const Agent = {
             
         }catch(e){
             console.log(e)
+            throw e;
         }
 
         console.log("createReply", completion.data.usage)

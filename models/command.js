@@ -54,24 +54,26 @@ exports.addItem = (order, arg) => {
  * @returns {String} 프롬프트반환
  */
 exports.removeItem = (order, arg) => {
-    item = arg[1].replace(/"/g, '')
-    count = parseInt(arg[2])
-    if (order.menu.indexOf(item)) {
-        return `we don't have ${item}`
-        // throw new Error("Fail to add")
-    }
-    let idx = order.cart.find(item => item.name === item);
-    if (idx) {
+    
+    //변환오류
+    if (arg.length != 2)
+        return `There is no menu`
 
-        order.cart[idx].cnt -= count
-        if (order.cart[idx].cnt < 0) {
-            order.cart[idx].cnt = 0
-        }
-    } else {
-        return `There is no ${item} in cart`
+    const menu_id = parseInt(arg[0])
+    const count = parseInt(arg[1])
 
+    const item = order.menu.find(menu => menu.id === menu_id)
+
+    if (!item)
+        return `There is no menu`
+
+    let old_item = order.cart.find(_item => _item.name === item.name)
+    if (old_item) {
+        old_item.cnt -= count
+        if(!old_item.cnt)[].
+            old_item = null
     }
-    order.cart.push({ name: item, cnt: count })
+    return ``//
 }
 
 
@@ -93,7 +95,10 @@ exports.setItem = (order, arg) => {
  * @param {*} order 
  * @returns {Array<T>} cart
  */
-exports.getCart = (order) => { `Cart : ${order.cart??``}`}
+exports.getCart = (order) => { 
+    
+   return  `Cart(ordered) : ${JSON.stringify(order.cart)}`
+}
 
 exports.getTotal = (order) => {
     order.cart
