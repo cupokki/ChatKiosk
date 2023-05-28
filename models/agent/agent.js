@@ -7,6 +7,7 @@
 //api 키 여러개로 스케줄링
 //토큰을 다소모하면 새로운 order로 내용을 전부 옮겨서 진행하자
 
+const e = require("cors")
 const { openai, createCompletion } = require("../../utils/openaiApi")
 
 //TODO: 대회의 state를 정해서 필요한 prompt를 교체하자
@@ -22,7 +23,7 @@ const Agent = {
 
     taskPrioritize : async( order, msg) =>{
         const messages = []
-        test_prompt = `Make paragraphs as short as possible with task-priority list`
+        test_prompt = `Make sentense to task list as short as possible`
         messages.push({ role: "system", content: `${test_prompt}` })
         messages.push({role : "user", content : `"${msg}"->`})//.concat(order.dialogue)
 
@@ -52,16 +53,21 @@ const Agent = {
 
         menu = JSON.stringify(order.menu)
         test_prompt = `
-       Convert Question to command. You Must consider conversation and  You Must follow example. as short as possible.
-       - If second arg is exist, the arg declare follow list [${menu}]
-       - If second arg is something similar in the menu, use similar one.
+            Convert Question to command.
+            You Must consider conversation.
+            You Must follow example. as short as possible.\
+                if context about order item or unorder item-> s id count
+                if context about ask about item info -> i id
+                if context about question cart(order list) -> l
+                other context  -> n 
+
+                - If second arg is exist, the arg declare follow list [${menu}]
+                - If second arg is something similar in the menu, use similar one's id.
        
-       if context about add order item-> a menu.id count
-       if context about remove order item-> r menu.id count
-       if context about question item info -> i menu.id
-       if context about question cart(order list) -> l
-        other context  -> n 
-        if 
+                Separate each command with a "/"
+       
+        
+        
         `
         
         const messages = []
@@ -70,7 +76,7 @@ const Agent = {
         messages.push({role : "user", content : `Convert text to command "${str}"->`})//.concat(order.dialogue)
         //TODO: 
     
-        console.log(messages)
+        
         let completion
         try{
             completion = await createCompletion({
@@ -83,12 +89,14 @@ const Agent = {
         }
 
 
-        cmd = completion.data.choices[0].message.content
-        cmd_line = cmd.split(" ")
-        console.log(cmd_line)
+        content = completion.data.choices[0].message.content
+        commands = content.split("/")
+        commands.forEach(element => {
+            element = element.split(" ")
+        });
         console.log("createCMD", completion.data.usage)
         order.token += completion.data.usage.total_tokens
-        return cmd_line// = [cmd, ...args]
+        return commands[0]// = [cmd, ...args]
     },
 
     /**

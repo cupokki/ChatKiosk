@@ -145,20 +145,23 @@ exports.createOrderCompletion =  async(req, res, next) => {
         req.session.order = null;
         res.status(400).send(err)
         // next("Too many dialogue")
-
     }
 
     try {
-        const tasks = await agent.taskPrioritize(order, msg)
-        console.log(tasks)
+        // const tasks = await agent.taskPrioritize(order, msg)
+        // console.log(tasks)
 
 
-        const cmd_line = await agent.extractCommand(order, msg)//extract command from request message
-        const cmd = cmd_line.shift();
-        const arguments = cmd_line
+        const commands = await agent.extractCommand(order, msg)//extract command from request message
+
+        console.log(commands)
+        const cmd = commands.shift();
+        const arguments = cmd
 
         let extra_prompt
 
+        
+        
         switch(cmd){ //execute command 
             case `i`:
                 //search command[1]
@@ -177,6 +180,7 @@ exports.createOrderCompletion =  async(req, res, next) => {
                 // 그거 말고 저거 주세요 이런식으로 하지.. 그러니까 바꿀 방법을 생각해야하고
                 // 그렇기 때문에 명령어를 보관할 필요도 있어보인다.
                 // 
+                extra_prompt = command.removeItem(order, arguments)
                 break
             case `l`:
                 extra_prompt = command.getCart(order)
@@ -214,6 +218,7 @@ exports.createOrderCompletion =  async(req, res, next) => {
     }
     catch(err){
         // next(err);
+        console.log(err)
         res.status(400).send(err)
     }
 };
