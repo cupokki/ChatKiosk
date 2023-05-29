@@ -151,48 +151,52 @@ exports.createOrderCompletion =  async(req, res, next) => {
         // const tasks = await agent.taskPrioritize(order, msg)
         // console.log(tasks)
 
-
+        let extra_prompt
         const commands = await agent.extractCommand(order, msg)//extract command from request message
 
-        console.log(commands)
-        const cmd = commands.shift();
-        const arguments = cmd
 
-        let extra_prompt
 
-        
-        
-        switch(cmd){ //execute command 
-            case `i`:
-                //search command[1]
-                extra_prompt = command.getInfo(order, arguments)
-                break
-                //activate menu
+        //이동예정
+        commands.forEach(element => {
+            console.log(element)
+            const arguments = element.split(" ")
+            const command_name = arguments.shift()
+            console.log(arguments)
+
+            // command.execute(order, command)
+
+            switch(command_name){ //execute command 
+                case `i`:
+                    //search command[1]
+                    extra_prompt = command.getInfo(order, arguments)
+                    break
+                    //activate menu
+                    
+                case `a`:
+                    //command[1] is exist
+                    //activate menu
+                    extra_prompt = command.addItem(order, arguments)
+                    //add command[1]
+                    break
+                case `r`:
+                    // 제거할때 이거 빼주세요 하고 하지않잖아
+                    // 그거 말고 저거 주세요 이런식으로 하지.. 그러니까 바꿀 방법을 생각해야하고
+                    // 그렇기 때문에 명령어를 보관할 필요도 있어보인다.
+                    // 
+                    extra_prompt = command.removeItem(order, arguments)
+                    break
+                case `l`:
+                    extra_prompt = command.getCart(order)
+                    break
                 
-            case `a`:
-                //command[1] is exist
-                //activate menu
-                extra_prompt = command.addItem(order, arguments)
-                //add command[1]
-                break
-            case `r`:
-                // 제거할때 이거 빼주세요 하고 하지않잖아
-                // 그거 말고 저거 주세요 이런식으로 하지.. 그러니까 바꿀 방법을 생각해야하고
-                // 그렇기 때문에 명령어를 보관할 필요도 있어보인다.
-                // 
-                extra_prompt = command.removeItem(order, arguments)
-                break
-            case `l`:
-                extra_prompt = command.getCart(order)
-                break
-            
-            default: // `n`
-                extra_prompt = `you didn't understand. ask to user again`
-                break
-                
-        }
+                default: // `n`
+                    extra_prompt = `you didn't understand. ask to user again`
+                    break  
+            }
+        });
+
         //TODO : 특정 명령어에만 menu, cart 활성화
-        const reply = await agent.createReply(order, msg, cmd, extra_prompt)
+        const reply = await agent.createReply(order, msg, extra_prompt)
         
         //최근 2쌍의 컨텐트만 dialogue에 보관
         if (order.dialogue.length > 3){
@@ -210,7 +214,7 @@ exports.createOrderCompletion =  async(req, res, next) => {
         console.log("step : ", order.step)
         res.json({
             reply : reply,
-            command : cmd,
+            command : commands,
             token : order.token,
             step : order.step
         })

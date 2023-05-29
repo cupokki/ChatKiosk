@@ -8,18 +8,14 @@
  * @returns 
  */
 exports.getInfo = (order, arg) => {
-    // console.log(arg)
-    // query shop's menu 
-    // select info from menu where name = arg[0]
     const menu_id = arg[0]
     const info = order.menu.find(menu => menu.id === menu_id)
     let prompt = info ? info : ``//디폴트 프롬프트에 메뉴에 없는 내용을 안내하지 말라는 것이 있음
-    return `Q: ${arg[1]} A: ${prompt}.`
-    // throw new Error('Failed to find')
+    return `Q: ${menu_id} A: ${prompt}.`
 }
 
 /**
- * cart에 주문내용 갱신
+ * cart에 주문내용 갱신s
  * @param {Order} order 
  * @param  {...any} arg 
  * @returns 
@@ -53,6 +49,28 @@ exports.addItem = (order, arg) => {
  * @param {*} arg 
  * @returns {String} 프롬프트반환
  */
+
+
+
+
+
+
+exports.execute = (command, arguments) =>{
+    switch(commmand){
+        case '':   
+            break;
+        default:
+            break;
+    }
+
+
+}
+
+
+
+
+
+
 exports.removeItem = (order, arg) => {
     
     //변환오류

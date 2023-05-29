@@ -91,14 +91,11 @@ const Agent = {
 
         content = completion.data.choices[0].message.content
         commands = content.split("/")
-        commands.forEach(element => {
-            element = element.split(" ")
-        });
         console.log("createCMD", completion.data.usage)
         order.token += completion.data.usage.total_tokens
-        return commands[0]// = [cmd, ...args]
+        console.log(commands)
+        return commands// = [cmd, ...args]
     },
-
     /**
      * 평문을 생성함
      * @param {Order} order
@@ -106,7 +103,7 @@ const Agent = {
      * @param {String} prompt
      * @returns 평문
     */
-    createReply: async (order, req_msg, cmd, extra_prompt) => {
+    createReply: async (order, req_msg, extra_prompt) => {
         let manual = `If 메뉴 추천 요청 시, 기호나 가격대를 되물을 것`
         const first_prompt =
             `You're ${"롯데리아"} order staff. menu :  {${JSON.stringify(order.menu)}}.
