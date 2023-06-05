@@ -116,45 +116,53 @@ exports.createOrderSession = async(req, res, next)  => {
     const order = {
         // shop_id : ,
         // shop_name : ,
-        menu : menu,
-        cart : [{name : `불고기버거`, cnt : 1}],
-        step : 0,
-        state : "greeting",
-        dialogue : [],
-        command_log : []
-    }
+        menu : menu,        //가게 메뉴
+        cart : [{name : `불고기버거`, cnt : 1}],    //주문내역
+        step : 0,   //최대 대화길이
+        state : "greeting", // 주문 상태
+        dialogue : [],      // 대화내역
+        command_log : []    // 명령내역 // 
 
+        //주문 
+    }
+    /*
+    상태 전이를 하는 요소는 무엇이며 어디서 트리거가 작동해야하는가?
+    completionService에서 전이가 이루어진다. order.stateTransition('')
+     greet
+        order로 전이 조건 : 
+    // Order
+        Pay로 전이 조건 : 결제할게요
+                        주문다했어요
+                        더필요하신건 없나요?
+    // Pay
+        결제할게요
+    // Done
+
+
+*/
     //create order
     req.session.order = order
     res.status(200).send('')
 }
 
 exports.createOrderCompletion =  async(req, res, next) => {
-    // Shop.getMenu("롯데리아")
-
     const msg = req.body.msg
     const order = req.session.order
 
     if(!order){
         next('There is no order')
         // res.status(400).send(err)
-
     }
-    if(order.step >= 30){
-        //terninate
-        req.session.order = null;
-        res.status(400).send(err)
-        // next("Too many dialogue")
-    }
+    // if(order.step >= 30){
+    //     //terninate
+    //     req.session.order = null;
+    //     res.status(400).send(err)
+    //     // next("Too many dialogue")
+    // }
 
     try {
-        // const tasks = await agent.taskPrioritize(order, msg)
-        // console.log(tasks)
-
         let extra_prompt
         const commands = await agent.extractCommand(order, msg)//extract command from request message
-
-
 
         //이동예정
         commands.forEach(element => {
