@@ -14,46 +14,79 @@
  * 근데 세션에 이걸 저장 할 수 있나? 없잖아
  * 일단 필드만 저장 시키자
  */
-const OrderState = {
-    Greet : `Greet`,
-    
-}
 
-class Order{
-    constructor({state}){
-        state: orderState
-        this.dialogue = []
-        // this.menu = [] // query menu list??
-        this.menu = []
-        this.cart = []
-        // this.requirement = ``//요청사항보단 option 속성을 검토해보자
-        this.step = 0;
-        this.token = 0;
-    }
-     getOrder(){        
-        return {
-            //Order's field
-            prompt : this.prompt,
-            dialogue : this.dialogue,
-            menu : this.menu,
-            cart : this.cart,
-            // requirement : this.requirement,
-            step : this.step,
-            token : this.token
+
+/**
+ * 주문 상태를 정의함
+ */
+const OrderState = Object.freeze({
+    Greet: Symbol(0),      // 초기상태
+    Order: Symbol(1),      // 
+    Paying: Symbol(2),
+    Done: Symbol(3)        // 완료된 주문
+})
+
+function OrderManagerFeild(feilds){
+    this.shop_id = feilds.shop_id,
+    this.shop_id = feilds.shop_name,
+    this.dialogue = feilds.dialogue,
+    this.state = feilds.state,
+    this.menu = feilds.menu,
+    this.orders = feilds.orders,
+    this.step = feilds.step,
+    this.token = feilds.token,
+}
+new OrderManagerFeild
+
+class OrderManager {
+    constructor() {
+        if(number === typeof arguments[0]){
+            this.shop_id = shop_id          // 가게 식별아이디
+            this.shop_name = ``             // 가게 이름
+            this.dialogue = []              // 주문 과정을 기억하여 프롬프트 구성에 활용하기 위함
+            this.state = OrderState.Greet   // 주문상태
+            this.menu = Shop.getMenuList(shop_id)   // 가게의 메뉴판
+            this.orders = []                // 주문의 
+            this.step = 0;
+            this.token = 0;
         }
+        else if (arguments[0] instanceof OrderManagerFeild){
+            this.shop_id = arguments[0].shop_id,
+            this.shop_name = arguments[0].shop_name,
+            this.dialogue = arguments[0].dialogue,
+            this.state = arguments[0].state,
+            this.menu = arguments[0].menu,
+            this.orders = arguments[0].orders,
+            this.step = arguments[0].step,
+            this.token = arguments[0].token
+        }else
+            throw new Error(`Failed`)
+        
+        // this.requirement = ``       //요청사항보단 option 속성을 검토해보자
     }
-    setOrder(arg){
-        this.prompt = arg.prompt
-        this.dialogue = arg.dialogue
-        this.menu = arg.menu
-        this.cart = arg.cart
-        // this.requirement = arg.requirement
-        this.step = arg.step
-        this.token - arg.token
+    constructor({orderFeilds}){
 
     }
-    
+    getFeilds() {
+        return new OrderManagerFeild({
+            shop_id: this.shop_id,          // 가게 식별아이디
+            shop_name: this.shop_name,             // 가게 이름
+            dialogue: this.dialogue,              // 주문 과정을 기억하여 프롬프트 구성에 활용하기 위함
+            state: this.state,                 // 주문상태
+            menu: this.menu,                  // 가게의 메뉴판
+            orders: this.orders,                // 주문의 
+            step: this.step,
+            token: this.token
+        })
+    }
+
+    setState(state){
+        this.OrderState = state
+    }
+
+
+
 }
 
-    
-module.exports = Order;
+
+module.exports = {OrderManager, OrderState};
