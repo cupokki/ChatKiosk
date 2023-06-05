@@ -111,24 +111,25 @@ exports.createOrderSession = async(req, res, next)  => {
     }catch(e){
         throw e;
     }
-
-    const order = {
-        shop_id : shop_id,
-        // shop_name : ,
-        menu : menu,
-        cart : [{name : `불고기버거`, cnt : 1}],
-        step : 0,
-        state : "greeting", //<--  이걸 어카지..
-        dialogue : [],
-        command_log : []
-    }
-    /// 되묻기 
-
     
+    const orderManager = new Order.OrderManager()
+    req.session.orderManagerFeild = orderManager.getFeilds()
 
+    // const order = {
+    //     shop_id : shop_id,
+    //     // shop_name :shop_name,
+    //     menu : menu,
+    //     cart : [{name : `불고기버거`, cnt : 1}],
+    //     step : 0,
+    //     status : "greeting", //<--  이걸 어카지..
+    //     dialogue : [],
+    //     command_log : []
+    // }
+    
+    // /// 되묻기 
 
-    //create order
-    req.session.order = order
+    // //create order
+    // req.session.order = order
     res.status(200).send('')
 }
 
@@ -136,7 +137,7 @@ exports.createOrderCompletion =  async(req, res, next) => {
     // Shop.getMenu("롯데리아")
 
     const msg = req.body.msg
-    const order = req.session.order
+    const orderManager = new OrderManager(req.session.orderManagerFeild)
 
     if(!order){
         next('There is no order')
@@ -145,7 +146,7 @@ exports.createOrderCompletion =  async(req, res, next) => {
     }
     if(order.step >= 30){
         //terninate
-        req.session.order = null;
+        req.session.orderManagerFeild = null;
         res.status(400).send(err)
         // next("Too many dialogue")
     }
@@ -155,7 +156,7 @@ exports.createOrderCompletion =  async(req, res, next) => {
         // console.log(tasks)
 
         let extra_prompt
-        const commands = await agent.extractCommand(order, msg)//extract command from request message
+        const commands = await agent.extractCommand(orderManager, msg)//extract command from request message
 
 
 
@@ -171,14 +172,15 @@ exports.createOrderCompletion =  async(req, res, next) => {
             switch(command_name){ //execute command 
                 case `i`:
                     //search command[1]
-                    extra_prompt = command.getInfo(order, arguments)
+                    extra_prompt = command.getInfo(orderManager, arguments)
                     break
                     //activate menu
                     
                 case `a`:
                     //command[1] is exist
                     //activate menu
-                    extra_prompt = command.addItem(order, arguments)
+                    extra_prompt = command.addItem(orderManager, arguments)
+                    //Change State
                     //add command[1]
                     break
                 case `r`:
@@ -186,10 +188,10 @@ exports.createOrderCompletion =  async(req, res, next) => {
                     // 그거 말고 저거 주세요 이런식으로 하지.. 그러니까 바꿀 방법을 생각해야하고
                     // 그렇기 때문에 명령어를 보관할 필요도 있어보인다.
                     // 
-                    extra_prompt = command.removeItem(order, arguments)
+                    extra_prompt = command.removeItem(orderManager, arguments)
                     break
                 case `l`:
-                    extra_prompt = command.getCart(order)
+                    extra_prompt = command.getCart(orderManager)
                     break
                 
                 default: // `n`
@@ -199,27 +201,27 @@ exports.createOrderCompletion =  async(req, res, next) => {
         });
 
         //TODO : 특정 명령어에만 menu, cart 활성화
-        const reply = await agent.createReply(order, msg, extra_prompt)
+        const reply = await agent.createReply(orderManager, msg, extra_prompt)
         
         //최근 2쌍의 컨텐트만 dialogue에 보관
-        if (order.dialogue.length > 3){
-            order.dialogue.shift()
-            order.dialogue.shift()
+        if (orderManager.dialogue.length > 3){
+            orderManager.dialogue.shift()
+            orderManager.dialogue.shift()
         }
         
-        order.dialogue.push({role : "user", content : msg})//reply생성 위에 존재시 429에러시 문제
-        order.dialogue.push({role : "assistant", content : reply})
+        orderManager.dialogue.push({role : "user", content : msg})//reply생성 위에 존재시 429에러시 문제
+        orderManager.dialogue.push({role : "assistant", content : reply})
 
-        order.step += 1;
-        req.session.order = order
+        orderManager.step += 1;
+        req.session.orderManagerFeild = orderManager.getFeilds
         // console.log(order.getOrder())
-        console.log("cart : ", order.cart)
-        console.log("step : ", order.step)
+        console.log("cart : ", orderManager.cart)
+        console.log("step : ", orderManager.step)
         res.json({
             reply : reply,
             command : commands,
-            token : order.token,
-            step : order.step
+            token : orderManager.token,
+            step : orderManager.step
         })
         
     }

@@ -1,6 +1,6 @@
-const Shop = require('../models/shop')
+const Shop = require("../models/shop/shop")
 
-exports.menuApiService = (req, res) =>{
+exports.getMenu = (req, res) =>{
     console.log('ative')
     test = Shop.getMenuList(1)
     console.log(test)

@@ -4,7 +4,7 @@ const session = require('express-session');
 const cors = require("cors");
 const dotenv = require('dotenv')
 const completionRouter = require('./routes/completion');
-const MenuApiRouter = require('./routes/shop');
+const menuApiRouter = require('./routes/shop');//TODO:
 
 dotenv.config();
 

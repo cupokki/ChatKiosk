@@ -34,13 +34,12 @@ function OrderManagerFeild(feilds){
     this.menu = feilds.menu,
     this.orders = feilds.orders,
     this.step = feilds.step,
-    this.token = feilds.token,
+    this.token = feilds.token
 }
-new OrderManagerFeild
 
 class OrderManager {
     constructor() {
-        if(number === typeof arguments[0]){
+        if(`number` === typeof arguments[0]){
             this.shop_id = shop_id          // 가게 식별아이디
             this.shop_name = ``             // 가게 이름
             this.dialogue = []              // 주문 과정을 기억하여 프롬프트 구성에 활용하기 위함
@@ -61,12 +60,8 @@ class OrderManager {
             this.token = arguments[0].token
         }else
             throw new Error(`Failed`)
-        
-        // this.requirement = ``       //요청사항보단 option 속성을 검토해보자
     }
-    constructor({orderFeilds}){
 
-    }
     getFeilds() {
         return new OrderManagerFeild({
             shop_id: this.shop_id,          // 가게 식별아이디
