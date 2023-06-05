@@ -21,27 +21,27 @@ const { openai, createCompletion } = require("../../utils/openaiApi")
 const Agent = {
     
 
-    taskPrioritize : async( order, msg) =>{
-        const messages = []
-        test_prompt = `Make sentense to task list as short as possible`
-        messages.push({ role: "system", content: `${test_prompt}` })
-        messages.push({role : "user", content : `"${msg}"->`})//.concat(order.dialogue)
+    // taskPrioritize : async( order, msg) =>{
+    //     const messages = []
+    //     test_prompt = `Make sentense to task list as short as possible`
+    //     messages.push({ role: "system", content: `${test_prompt}` })
+    //     messages.push({role : "user", content : `"${msg}"->`})//.concat(order.dialogue)
 
     
-        console.log(messages)
-        let completion
-        try{
-            completion = await createCompletion({
-                model: "gpt-3.5-turbo",
-                messages: messages
-            })
+    //     console.log(messages)
+    //     let completion
+    //     try{
+    //         completion = await createCompletion({
+    //             model: "gpt-3.5-turbo",
+    //             messages: messages
+    //         })
             
-        }catch(e){
-            console.log(e)
-        }
-        data = completion.data.choices[0].message.content
-        return data
-    },
+    //     }catch(e){
+    //         console.log(e)
+    //     }
+    //     data = completion.data.choices[0].message.content
+    //     return data
+    // },
 
     /**
      * 명령어를 추출함
@@ -56,9 +56,10 @@ const Agent = {
             Convert Question to command.
             You Must consider conversation.
             You Must follow example. as short as possible.\
-                if context about order item or unorder item-> s id count
+                if context about order or cancel item-> o id count
                 if context about ask about item info -> i id
-                if context about question cart(order list) -> l
+                if context about ask cart(order list) -> l
+                if context about ask how much -> s p
                 other context  -> n 
 
                 - If second arg is exist, the arg declare follow list [${menu}]
@@ -69,11 +70,16 @@ const Agent = {
         
         
         `
-        
+        //단순 네/ 아니요같은 대답은 기존 assistant의 응답 을 활용함
+        // 근데 에이전트가 물어본다는 것은 내가 말한것에 대한 응답이란거잖아
+        // ex
+        // 불고기 빼고 감자튀김 주세요
+        // 
         const messages = []
         messages.push({ role: "system", content: `${test_prompt}` })
-        messages.concat(order.dialogue)
-        messages.push({role : "user", content : `Convert text to command "${str}"->`})//.concat(order.dialogue)
+        // messages.concat(order.dialogue)
+        
+        messages.push({role : "user", content : `Convert context to command "${str}"->`})//.concat(order.dialogue)
         //TODO: 
     
         
@@ -114,7 +120,7 @@ const Agent = {
              as short as possible.
              Do not ask again.
              ${manual}
-             
+             ${order.cart?`Ask if there is anything more to order.`:``}
             `// + cmd==='l'? `cart :  {${JSON.stringify(order.cart)}}.`:""
         let test_prompt = first_prompt + extra_prompt
         const messages = [{ role: "system", content: `${test_prompt}` }].concat(order.dialogue)

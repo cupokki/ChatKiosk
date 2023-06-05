@@ -101,7 +101,6 @@ exports.test = async (req, res, next) => {
 }
 
 exports.createOrderSession = async(req, res, next)  => {
-    //라우터에 달아두자
     let shop_id, shop_name;
     if(!(shop_id = req.body.shop_id)){
         next('There is no id')
@@ -114,15 +113,19 @@ exports.createOrderSession = async(req, res, next)  => {
     }
 
     const order = {
-        // shop_id : ,
+        shop_id : shop_id,
         // shop_name : ,
         menu : menu,
         cart : [{name : `불고기버거`, cnt : 1}],
         step : 0,
-        state : "greeting",
+        state : "greeting", //<--  이걸 어카지..
         dialogue : [],
         command_log : []
     }
+    /// 되묻기 
+
+    
+
 
     //create order
     req.session.order = order

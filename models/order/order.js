@@ -14,8 +14,14 @@
  * 근데 세션에 이걸 저장 할 수 있나? 없잖아
  * 일단 필드만 저장 시키자
  */
+const OrderState = {
+    Greet : `Greet`,
+    
+}
+
 class Order{
-    constructor(){
+    constructor({state}){
+        state: orderState
         this.dialogue = []
         // this.menu = [] // query menu list??
         this.menu = []

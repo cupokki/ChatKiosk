@@ -1,5 +1,14 @@
 //명령어 들을 정의
+exports.execute = (command, arguments) =>{
+    switch(commmand){
+        case '':   
+            break;
+        default:
+            break;
+    }
 
+
+}
 
 /**
  * 아이템의 정보 추출
@@ -49,28 +58,6 @@ exports.addItem = (order, arg) => {
  * @param {*} arg 
  * @returns {String} 프롬프트반환
  */
-
-
-
-
-
-
-exports.execute = (command, arguments) =>{
-    switch(commmand){
-        case '':   
-            break;
-        default:
-            break;
-    }
-
-
-}
-
-
-
-
-
-
 exports.removeItem = (order, arg) => {
     
     //변환오류
@@ -103,7 +90,18 @@ exports.removeItem = (order, arg) => {
  * @returns 
  */
 exports.setItem = (order, arg) => {
-    console.log(order.menu[arg[1]])
+    //변환오류
+    if (arg.length != 2)
+        return `There is no menu`
+    
+    const menu_id = parseInt(arg[0])
+    const count = parseInt(arg[1])
+
+    const item = order.menu.fine(menu => menu.id === menu_id)
+
+    if(!item)
+
+    
 
     return
 }
