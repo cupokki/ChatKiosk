@@ -50,6 +50,12 @@ class OrderManager {
     setState(state){
         this.OrderState = state
     }
+
+    getInfo(menu_id){
+        const info = order.menu.find(menu => menu.id === menu_id)
+        let prompt = info ? info : ``//디폴트 프롬프트에 메뉴에 없는 내용을 안내하지 말라는 것이 있음
+        return `Q: ${menu_id} A: ${prompt}.`
+    }
 }
 
 

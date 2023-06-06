@@ -6,8 +6,6 @@ exports.execute = (command, arguments) =>{
         default:
             break;
     }
-
-
 }
 
 /**
