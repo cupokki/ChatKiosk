@@ -3,33 +3,26 @@ const { Configuration, OpenAIApi } = require("openai");
 
 dotenv.config();
 
-const configuration = new Configuration({
-  apiKey: process.env.API_KEY_1,
-});
-// exports.openai = new OpenAIApi(configuration);
-const openai1 = new OpenAIApi(configuration);
+api_keys = JSON.parse(process.env.API_KEYS)
 
-const configuration2 = new Configuration({
-  apiKey: process.env.API_KEY_2
-});
-const openai2 = new OpenAIApi(configuration);
-exports.openai = new OpenAIApi(configuration);
-const configuration3 = new Configuration({
-  apiKey: process.env.API_KEY_2
-});
-const openai3 = new OpenAIApi(configuration);
+const pool = []
+var pool_pointer = 0;
 
-let pool = [openai1, openai2, openai3]
+api_keys.forEach(key => {
+  const configuration = new Configuration({
+    apiKey: key
+  });
+  pool.push(new OpenAIApi(configuration))
+})
 
-let idx = 0;
-
-
+// https://jungseob86.tistory.com/12
+// API 응답의 신뢰성 위한 retry로 발생하는 부담을 줄이기 위한 방법, 현재는 그냥 무조건 반복
 exports.createCompletion = async (args) => {
   let i = 1;
-  let max = 100;
-  while ( i < max) {
+  let max = 10;
+  while (i < max) {
     try {
-      const completion = await pool[idx % pool.length].createChatCompletion({
+      const completion = await pool[pool_pointer % pool.length].createChatCompletion({
         model: args.model,//"gpt-3.5-turbo",
         messages: args.messages
       })
@@ -37,12 +30,12 @@ exports.createCompletion = async (args) => {
 
     } catch (e) {
       //429에 대한 에러 구분 해야함
-      // console.log(e.response.code)
+      // console.log(e.config.request.response.status)
       // console.log('i : ', i)
-      idx++
+      pool_pointer++
       i++
     }
-    
+
   }
   throw new Error(`Completion Faild`)
 }

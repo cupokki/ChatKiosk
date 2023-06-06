@@ -1,57 +1,16 @@
-//에이전트들은 명령어와 대답을 생성한다.
-//completion을 생성하는 주체는 agent이다.
-//명령을 수행하는 주체도 agent이다
-//일단 이게 기존 Chat class 대체할 부분이다
-//Agent는 필드가 필요없다.
-//너무 많은 요청에 대한 문제 429
-//api 키 여러개로 스케줄링
-//토큰을 다소모하면 새로운 order로 내용을 전부 옮겨서 진행하자
-
-const e = require("cors")
 const { openai, createCompletion } = require("../../utils/openaiApi")
 
-//TODO: 대회의 state를 정해서 필요한 prompt를 교체하자
-//state를 결정짓는 것은 command를 통해서
-//getCompletion 서비스 로직쪽으로 옮길 필요 있음
-// const default_prompt = //
-//     `You're ${"패스트푸드점"} staff. talk with just korean.  Ask "Anything else?" every answer `,
-//     // as short as possible answer <- 너무 단답을 만들어냄
-// const end_prompt = ``,
-
 const Agent = {
-    
-
-    // taskPrioritize : async( order, msg) =>{
-    //     const messages = []
-    //     test_prompt = `Make sentense to task list as short as possible`
-    //     messages.push({ role: "system", content: `${test_prompt}` })
-    //     messages.push({role : "user", content : `"${msg}"->`})//.concat(order.dialogue)
-
-    
-    //     console.log(messages)
-    //     let completion
-    //     try{
-    //         completion = await createCompletion({
-    //             model: "gpt-3.5-turbo",
-    //             messages: messages
-    //         })
-            
-    //     }catch(e){
-    //         console.log(e)
-    //     }
-    //     data = completion.data.choices[0].message.content
-    //     return data
-    // },
 
     /**
      * 명령어를 추출함
-     * @param {Order} order 
+     * @param {Order} orderManager 
      * @param {String} str 
      * @returns 
     */
-    extractCommand: async (order, str) => {
-
-        menu = JSON.stringify(order.menu)
+    extractCommand: async (orderManager, str) => {
+        
+        menu = JSON.stringify(orderManager.menu)
         test_prompt = `
             Convert Question to command.
             You Must consider conversation.
@@ -59,7 +18,7 @@ const Agent = {
                 if context about order or cancel item-> o id count
                 if context about ask about item info -> i id
                 if context about ask cart(order list) -> l
-                if context about ask how much -> s p
+                if context about ask how much -> s p${/*ㄴㅇ*/null }
                 other context  -> n 
 
                 - If second arg is exist, the arg declare follow list [${menu}]
@@ -94,11 +53,10 @@ const Agent = {
             console.log(e)
         }
 
-
         content = completion.data.choices[0].message.content
         commands = content.split("/")
         console.log("createCMD", completion.data.usage)
-        order.token += completion.data.usage.total_tokens
+        orderManager.token += completion.data.usage.total_tokens
         console.log(commands)
         return commands// = [cmd, ...args]
     },
@@ -120,7 +78,7 @@ const Agent = {
              as short as possible.
              Do not ask again.
              ${manual}
-             ${order.cart?`Ask if there is anything more to order.`:``}
+             ${order.cart?`Ask if there is anything more to order.`:``} 
             `// + cmd==='l'? `cart :  {${JSON.stringify(order.cart)}}.`:""
         let test_prompt = first_prompt + extra_prompt
         const messages = [{ role: "system", content: `${test_prompt}` }].concat(order.dialogue)

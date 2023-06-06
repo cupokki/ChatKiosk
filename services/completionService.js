@@ -1,104 +1,7 @@
-// const userModel = require('../models/userModel');
-
-// exports.getUsers = async (req, res, next) => {
-//   try {
-//     const users = await userModel.find();
-//     res.status(200).json({
-//       status: 'success',
-//       results: users.length,
-//       data: {
-//         users,
-//       },
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-// exports.getUser = async (req, res, next) => {
-//   try {
-//     const user = await userModel.findById(req.params.id);
-//     res.status(200).json({
-//       status: 'success',
-//       data: {
-//         user,
-//       },
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-// exports.createUser = async (req, res, next) => {
-//   try {
-//     const newUser = await userModel.create(req.body);
-//     res.status(201).json({
-//       status: 'success',
-//       data: {
-//         user: newUser,
-//       },
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-// exports.updateUser = async (req, res, next) => {
-//   try {
-//     const user = await userModel.findByIdAndUpdate(req.params.id, req.body, {
-//       new: true,
-//       runValidators: true,
-//     });
-//     res.status(200).json({
-//       status: 'success',
-//       data: {
-//         user,
-//       },
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-// exports.deleteUser = async (req, res, next) => {
-//   try {
-//     await userModel.findByIdAndDelete(req.params.id);
-//     res.status(204).json({
-//       status: 'success',
-//       data: null,
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 const agent = require("../models/agent/agent")
-const Order = require("../models/order/order")
+const OrderManager = require("../models/order/order")
 const Shop = require("../models/shop/shop")
 const command = require("../models/command")
-const {openai} = require("../utils/openaiApi")
-
-let test =[{role : 'system' , content : '테스트 테스트'}]
-let step = 1
-let sum = 0;
-exports.test = async (req, res, next) => {
-    try{
-        msg = req.body.msg 
-        test.push({role : "user", content : msg})//reply생성 위에 존재시 429에러시 문제
-        
-        const completion = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages: test
-        })
-        
-        id = completion.data.id
-        reply = completion.data.choices[0].message.content
-        test.push({role : "assistant", content : id})
-        console.log(completion.data.usage, test)
-        res.status(200).send(reply)
-    }catch(err){
-        console.error(err)
-    }
-}
 
 exports.createOrderSession = async(req, res, next)  => {
     let shop_id, shop_name;
@@ -106,71 +9,37 @@ exports.createOrderSession = async(req, res, next)  => {
         next('There is no id')
     }
     try{
-        const orderManager = new Order.OrderManager(shop_id)
-        // menu = await Shop.getMenuList(shop_id)
-        // console.log(menu)
+        const orderManager = new OrderManager(shop_id)
+        orderManager.setMenu(shop_id)
+        req.session.orderManager = orderManager.getFeilds()
+        console.log(orderManager) //데이터쿼리과정에서 비동기화 소요 발생 
+        res.status(200).json({
+            response : 'created'
+        })
     }catch(e){
-        throw e;
+        res.status(400).json({
+            response : 'Failed to create'
+        })
+        throw(e)
     }
-    
-    // console.log(orderManager) //데이터쿼리과정에서 비동기화 소요 발생 
-    req.session.orderManagerFeild = orderManager.getFeilds()
-
-    // const order = {
-    //     shop_id : shop_id,
-    //     // shop_name :shop_name,
-    //     menu : menu,        //가게 메뉴
-    //     cart : [{name : `불고기버거`, cnt : 1}],    //주문내역
-    //     step : 0,   //최대 대화길이
-    //     status : "greeting", // 주문 상태 //<--  이걸 어카지..
-    //     dialogue : [],      // 대화내역
-    //     command_log : []    // 명령내역 // 
-
-        //주문 
-    // }
-    /*
-    상태 전이를 하는 요소는 무엇이며 어디서 트리거가 작동해야하는가?
-    completionService에서 전이가 이루어진다. order.stateTransition('')
-     greet
-        order로 전이 조건 : 
-    // Order
-        Pay로 전이 조건 : 결제할게요
-                        주문다했어요
-                        더필요하신건 없나요?
-    // Pay
-        결제할게요
-    // Done
-
-    
-*/
-    // /// 되묻기 
-
-    // //create order
-    // req.session.order = order
-    res.status(200).send('')
 }
 
 exports.createOrderCompletion =  async(req, res, next) => {
-    const msg = req.body.msg
-    const orderManager = new OrderManager(req.session.orderManagerFeild)
-
-    if(!order){
+    if(!req.session.orderManager){
         next('There is no order')
-        // res.status(400).send(err)
-
+        // 에러처리
     }
-    if(orderManager.step >= 30){
-        //terninate
+
+    const msg = req.body.msg
+    const orderManager = new OrderManager(req.session.orderManager)
+    orderManager.setMenu()
+    
+    if(orderManager.step >= 30){    // 
+        orderManager = null
         req.session.orderManagerFeild = null;
         res.status(400).send(err)
-        // next("Too many dialogue")
+        // 에러처리
     }
-    // if(order.step >= 30){
-    //     //terninate
-    //     req.session.order = null;
-    //     res.status(400).send(err)
-    //     // next("Too many dialogue")
-    // }
 
     try {
         let extra_prompt
