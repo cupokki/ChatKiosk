@@ -101,30 +101,33 @@ exports.test = async (req, res, next) => {
 }
 
 exports.createOrderSession = async(req, res, next)  => {
-    //라우터에 달아두자
     let shop_id, shop_name;
     if(!(shop_id = req.body.shop_id)){
         next('There is no id')
     }
     try{
-        menu = await Shop.getMenuList(shop_id)
-        console.log(menu)
+        const orderManager = new Order.OrderManager(shop_id)
+        // menu = await Shop.getMenuList(shop_id)
+        // console.log(menu)
     }catch(e){
         throw e;
     }
+    
+    // console.log(orderManager) //데이터쿼리과정에서 비동기화 소요 발생 
+    req.session.orderManagerFeild = orderManager.getFeilds()
 
-    const order = {
-        // shop_id : ,
-        // shop_name : ,
-        menu : menu,        //가게 메뉴
-        cart : [{name : `불고기버거`, cnt : 1}],    //주문내역
-        step : 0,   //최대 대화길이
-        state : "greeting", // 주문 상태
-        dialogue : [],      // 대화내역
-        command_log : []    // 명령내역 // 
+    // const order = {
+    //     shop_id : shop_id,
+    //     // shop_name :shop_name,
+    //     menu : menu,        //가게 메뉴
+    //     cart : [{name : `불고기버거`, cnt : 1}],    //주문내역
+    //     step : 0,   //최대 대화길이
+    //     status : "greeting", // 주문 상태 //<--  이걸 어카지..
+    //     dialogue : [],      // 대화내역
+    //     command_log : []    // 명령내역 // 
 
         //주문 
-    }
+    // }
     /*
     상태 전이를 하는 요소는 무엇이며 어디서 트리거가 작동해야하는가?
     completionService에서 전이가 이루어진다. order.stateTransition('')
@@ -138,20 +141,29 @@ exports.createOrderSession = async(req, res, next)  => {
         결제할게요
     // Done
 
-
+    
 */
-    //create order
-    req.session.order = order
+    // /// 되묻기 
+
+    // //create order
+    // req.session.order = order
     res.status(200).send('')
 }
 
 exports.createOrderCompletion =  async(req, res, next) => {
     const msg = req.body.msg
-    const order = req.session.order
+    const orderManager = new OrderManager(req.session.orderManagerFeild)
 
     if(!order){
         next('There is no order')
         // res.status(400).send(err)
+
+    }
+    if(orderManager.step >= 30){
+        //terninate
+        req.session.orderManagerFeild = null;
+        res.status(400).send(err)
+        // next("Too many dialogue")
     }
     // if(order.step >= 30){
     //     //terninate
@@ -162,7 +174,7 @@ exports.createOrderCompletion =  async(req, res, next) => {
 
     try {
         let extra_prompt
-        const commands = await agent.extractCommand(order, msg)//extract command from request message
+        const commands = await agent.extractCommand(orderManager, msg)//extract command from request message
 
         //이동예정
         commands.forEach(element => {
@@ -176,14 +188,15 @@ exports.createOrderCompletion =  async(req, res, next) => {
             switch(command_name){ //execute command 
                 case `i`:
                     //search command[1]
-                    extra_prompt = command.getInfo(order, arguments)
+                    extra_prompt = command.getInfo(orderManager, arguments)
                     break
                     //activate menu
                     
                 case `a`:
                     //command[1] is exist
                     //activate menu
-                    extra_prompt = command.addItem(order, arguments)
+                    extra_prompt = command.addItem(orderManager, arguments)
+                    //Change State
                     //add command[1]
                     break
                 case `r`:
@@ -191,10 +204,10 @@ exports.createOrderCompletion =  async(req, res, next) => {
                     // 그거 말고 저거 주세요 이런식으로 하지.. 그러니까 바꿀 방법을 생각해야하고
                     // 그렇기 때문에 명령어를 보관할 필요도 있어보인다.
                     // 
-                    extra_prompt = command.removeItem(order, arguments)
+                    extra_prompt = command.removeItem(orderManager, arguments)
                     break
                 case `l`:
-                    extra_prompt = command.getCart(order)
+                    extra_prompt = command.getCart(orderManager)
                     break
                 
                 default: // `n`
@@ -204,27 +217,27 @@ exports.createOrderCompletion =  async(req, res, next) => {
         });
 
         //TODO : 특정 명령어에만 menu, cart 활성화
-        const reply = await agent.createReply(order, msg, extra_prompt)
+        const reply = await agent.createReply(orderManager, msg, extra_prompt)
         
         //최근 2쌍의 컨텐트만 dialogue에 보관
-        if (order.dialogue.length > 3){
-            order.dialogue.shift()
-            order.dialogue.shift()
+        if (orderManager.dialogue.length > 3){
+            orderManager.dialogue.shift()
+            orderManager.dialogue.shift()
         }
         
-        order.dialogue.push({role : "user", content : msg})//reply생성 위에 존재시 429에러시 문제
-        order.dialogue.push({role : "assistant", content : reply})
+        orderManager.dialogue.push({role : "user", content : msg})//reply생성 위에 존재시 429에러시 문제
+        orderManager.dialogue.push({role : "assistant", content : reply})
 
-        order.step += 1;
-        req.session.order = order
+        orderManager.step += 1;
+        req.session.orderManagerFeild = orderManager.getFeilds
         // console.log(order.getOrder())
-        console.log("cart : ", order.cart)
-        console.log("step : ", order.step)
+        console.log("cart : ", orderManager.cart)
+        console.log("step : ", orderManager.step)
         res.json({
             reply : reply,
             command : commands,
-            token : order.token,
-            step : order.step
+            token : orderManager.token,
+            step : orderManager.step
         })
         
     }

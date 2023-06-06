@@ -4,6 +4,7 @@ const session = require('express-session');
 const cors = require("cors");
 const dotenv = require('dotenv')
 const completionRouter = require('./routes/completion');
+const menuApiRouter = require('./routes/shop');//TODO:
 
 dotenv.config();
 
@@ -24,9 +25,10 @@ app.use(session({
 }));
 
 app.use("/completion", completionRouter);
+app.use("/menu", menuApiRouter);
 app
   .get("*",(req, res)=>{
-    res.send("Not Found")
+    res.status(404).send("Not Found")
   })
 
 
