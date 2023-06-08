@@ -1,4 +1,4 @@
-const { openai, createCompletion } = require("../../utils/openaiApi")
+const { openai, createCompletion } = require("../utils/openaiApi")
 
 const Agent = {
 
@@ -19,6 +19,7 @@ const Agent = {
                 if context about ask about item info -> i id
                 if context about ask cart(order list) -> l
                 if context about ask how much -> s p${/*ㄴㅇ*/null }
+                if context about accept previouse request -> y
                 other context  -> n 
 
                 - If second arg is exist, the arg declare follow list [${menu}]
@@ -70,15 +71,15 @@ const Agent = {
     createReply: async (order, req_msg, extra_prompt) => {
         let manual = `If 메뉴 추천 요청 시, 기호나 가격대를 되물을 것`
         const first_prompt =
-            `You're ${"롯데리아"} order staff. menu :  {${JSON.stringify(order.menu)}}.
+            `You're ${"롯데리아"} restaurant order assistant. menu : {${JSON.stringify(order.menu)}}.
              Never reply unrelated to the order.
-             You're job is just take order,DO NOT SERVE ITEM.
+             You're job is just take order, NOT SERVE ITEM.
              Talk only korean.
              You NEVER contain menu list in reply.
              as short as possible.
              Do not ask again.
              ${manual}
-             ${order.cart?`Ask if there is anything more to order.`:``} 
+             ${order.cart?`Ask if there is anything more to order. and  stense last '(c_p)'`:``} 
             `// + cmd==='l'? `cart :  {${JSON.stringify(order.cart)}}.`:""
         let test_prompt = first_prompt + extra_prompt
         const messages = [{ role: "system", content: `${test_prompt}` }].concat(order.dialogue)
@@ -101,17 +102,6 @@ const Agent = {
         order.token += completion.data.usage.total_tokens
         return completion.data.choices[0].message.content
     },
-
-
-    //TODO:삭제예정
-    checkItem: async (order, item) => {
-        const completion = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt: `${item} is in the ${JSON.stringify(order.menu)} if nothing match, return "n" ->`
-        })
-        console.log(completion.data.choices[0].text)
-        // return 
-    }
 }
 
 

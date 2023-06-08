@@ -1,4 +1,4 @@
-const connection = require("../../utils/dbConnection")
+const connection = require("../utils/dbConnection")
 
 const Shop = {
     

@@ -1,6 +1,6 @@
-const agent = require("../models/agent/agent")
-const OrderManager = require("../models/order/order")
-const Shop = require("../models/shop/shop")
+const agent = require("../models/agent")
+const OrderManager = require("../models/orderManager")
+const Shop = require("../models/shop")
 const command = require("../models/command")
 
 exports.createOrderSession = async(req, res, next)  => {

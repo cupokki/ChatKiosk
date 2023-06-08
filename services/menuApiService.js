@@ -1,4 +1,4 @@
-const Shop = require("../models/shop/shop")
+const Shop = require("../models/shop")
 
 exports.getMenu = (req, res) =>{
     console.log('ative')

@@ -1,4 +1,4 @@
-const Shop = require("../shop/shop")
+const Shop = require("./shop")
 
 /**
  * 주문 상태를 정의함
@@ -9,6 +9,7 @@ const OrderState = Object.freeze({
     Paying: "Paying",     // 결제
     Done : "Done"        // 완료된 주문
 })
+//when Greet : 고객응대 메뉴얼을 프롬에 삽입
 
 class OrderManager {
     constructor(arg) {
@@ -47,15 +48,22 @@ class OrderManager {
         };
     }
 
+
     setState(state){
         this.OrderState = state
     }
-
     getInfo(menu_id){
         const info = order.menu.find(menu => menu.id === menu_id)
         let prompt = info ? info : ``//디폴트 프롬프트에 메뉴에 없는 내용을 안내하지 말라는 것이 있음
         return `Q: ${menu_id} A: ${prompt}.`
     }
+    orderItem(menu_id, count){
+
+    }
+    getCartList(){
+
+    }
+    
 }
 
 
