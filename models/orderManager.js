@@ -31,7 +31,7 @@ class OrderManager {
         this.token = arg.token || 0;
     }
 
-    async setMenu(){
+    async initMenu(){
         this.menu = await Shop.getMenuNameList(this.shop_id)
     }
 
