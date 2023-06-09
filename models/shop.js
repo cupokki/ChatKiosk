@@ -21,7 +21,7 @@ const Shop = {
 
     getMenuList : async (shop_id)=>{
         const results = await connection.execute(
-            `select * from Menu JOIN Store on Store.id = Menu.store_id Where Store.id = ?;`
+            `select * from Menu Where Menu.store_id = ?;`
             ,[shop_id]
         )
         return results[0];
