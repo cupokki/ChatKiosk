@@ -47,24 +47,17 @@ exports.createOrderCompletion =  async(req, res, next) => {
 
         //이동예정
         commands.forEach(element => {
-            console.log(element)
-            const arguments = element.split(" ")
-            const command_name = arguments.shift()
-            console.log(arguments)
+            const args = element.split(" ")
+            const command_name = args.shift()
 
             // command.execute(order, command)
-
             switch(command_name){ //execute command 
                 case `i`:
-                    //search command[1]
                     extra_prompt = command.getInfo(orderManager, arguments)
                     break
-                    //activate menu
-                    
                 case `a`:
-                    //command[1] is exist
-                    //activate menu
                     extra_prompt = command.addItem(orderManager, arguments)
+                    OrderManager.orderItem(item_id, count)
                     //Change State
                     //add command[1]
                     break
@@ -113,7 +106,7 @@ exports.createOrderCompletion =  async(req, res, next) => {
     catch(err){
         // next(err);
         console.log(err)
-        res.status(400).send(err)
+        res.status(500).send(err)
     }
 };
 
