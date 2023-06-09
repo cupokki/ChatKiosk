@@ -1,5 +1,8 @@
 import sys
 import base64
+import os
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google-cloud-sdk/tts-key.json"
 
 string = sys.argv[1] #테스트 시 주석
 
