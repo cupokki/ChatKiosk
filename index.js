@@ -4,7 +4,8 @@ const session = require('express-session');
 const cors = require("cors");
 const dotenv = require('dotenv')
 const completionRouter = require('./routes/completion');
-const menuApiRouter = require('./routes/shop');//TODO:
+const menuApiRouter = require('./routes/menu');//TODO:
+const voiceApiRouter = require('./routes/voice');
 
 dotenv.config();
 
@@ -26,6 +27,8 @@ app.use(session({
 
 app.use("/completion", completionRouter);
 app.use("/menu", menuApiRouter);
+app.use("/voice", voiceApiRouter);
+
 app
   .get("*",(req, res)=>{
     res.status(404).send("Not Found")

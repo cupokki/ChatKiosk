@@ -32,7 +32,7 @@ class OrderManager {
     }
 
     async setMenu(){
-        this.menu = await Shop.getMenuList(this.shop_id)
+        this.menu = await Shop.getMenuNameList(this.shop_id)
     }
 
     getFeilds() {
