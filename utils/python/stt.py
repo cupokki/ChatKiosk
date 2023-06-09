@@ -23,5 +23,5 @@ config = speech.RecognitionConfig(
 response = client.recognize(config = config, audio = audio)
 
 for trans in response.results:
-    result = {trans.alternatives[0].transcript: string}
+    result = {"string": trans.alternatives[0].transcript}
     print(result, end='')
