@@ -4,24 +4,36 @@ import io
 import os
 from google.cloud import speech
 
-client = speech.SpeechClient()
+TESTFILE = "recordFile.base64"
 
-encoded_voice = sys.argv[1]
+def stt() :
 
-string = encoded_voice
+    client = speech.SpeechClient()
 
-content = string
-audio = speech.RecognitionAudio(content=content)
+    encoded_voice = sys.argv[1] #테스트시 주석
+
+    string = encoded_voice #테스트시 주석
+
+    #f = open(TESTFILE, 'rb') TestCode
+    #string = f.read()
+    #f.close()
+
+    content = string
+    audio = speech.RecognitionAudio(content=content)
 
 
-config = speech.RecognitionConfig(
-    encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-    sample_rate_hertz=16000,
-    language_code="ko-KR",
-)
+    config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+        sample_rate_hertz=16000,
+        language_code="ko-KR",
+    )
 
-response = client.recognize(config = config, audio = audio)
+    response = client.recognize(config = config, audio = audio)
 
-for trans in response.results:
-    result = {"string": trans.alternatives[0].transcript}
-    print(result, end='')
+    for trans in response.results:
+        result = {"string": trans.alternatives[0].transcript}
+        print(result, end='')
+
+
+if __name__ == "__main__":
+    stt()
