@@ -12,8 +12,14 @@ dotenv.config();
 const app = express();
   
 // app.use(bodyParser.json());
+const corsOptions = {
+  origin: 'http://localhost:3000', // 허용할 도메인
+  credentials: true, // 쿠키 전달 여부
+};
+
+// CORS 미들웨어 적용
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use(cors());
 app.use(express.urlencoded({ extended: true }))
 
 app.use(session({
