@@ -1,14 +1,14 @@
 import sys
 import base64
 
-#string = sys.argv[1] #테스트 시 주석
+string = sys.argv[1] #테스트 시 주석
 
 def tts() :
 
     from gtts import gTTS
 
     # Test Code
-    string = "안녕하세요"
+    #string = "안녕하세요"
 
     tts = gTTS(string, lang="ko")
     tts.save('trans.base64')
