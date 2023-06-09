@@ -1,11 +1,12 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    volumes:
-      - /home/cupokki/Workspace/ChatKiosk/server:/app/server:rw
+  server:
+    build: .  #dockerfile위치
+    image: chat-kiosk-server
+    volumes:  #디렉터리생성
+      - .:/app
     ports:
-      - 3000:3000
-    command: npm start
+      - 8000:8000
+    command: sh -c "npm i && npm start"
 
