@@ -31,7 +31,13 @@ exports.createOrderCompletion =  async(req, res, next) => {
     }
 
     const msg = req.body.msg
-    const orderManager = new OrderManager(req.session.orderManager)
+    const orderManager = null
+    try{
+        orderManager = new OrderManager(req.session.orderManager)
+    }catch(e){
+        console.error(e)
+        res.status(500).send(e)
+    }
     orderManager.initMenu()
     
     if(orderManager.step >= 30){    // 
