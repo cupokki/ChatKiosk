@@ -31,10 +31,17 @@ class OrderManager {
         this.token = arg.token || 0;
     }
 
-    async setMenu(){
+    /**
+     * 메뉴판 초기화
+     */
+    async initMenu(){
         this.menu = await Shop.getMenuNameList(this.shop_id)
     }
 
+    /**
+     * session에 저장하기 위하여 필드 추출
+     * @returns {OrderManager} OrderManagerfield
+     */
     getFeilds() {
         return {
             shop_id: this.shop_id,          // 가게 식별아이디
@@ -48,11 +55,19 @@ class OrderManager {
         };
     }
 
-
+    /**
+     * 상태 변경
+     * @param {OrderState} state 
+     */
     setState(state){
         this.OrderState = state
     }
 
+    /**
+     * 
+     * @param {String} menu_id 
+     * @returns 
+     */
     getInfo(menu_id){
         const info = order.menu.find(menu => menu.id === menu_id)
         let prompt = info ? info : ``//디폴트 프롬프트에 메뉴에 없는 내용을 안내하지 말라는 것이 있음

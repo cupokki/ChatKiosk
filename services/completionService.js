@@ -10,7 +10,7 @@ exports.createOrderSession = async(req, res, next)  => {
     }
     try{
         const orderManager = new OrderManager(shop_id)
-        orderManager.setMenu(shop_id)
+        orderManager.initMenu(shop_id)
         req.session.orderManager = orderManager.getFeilds()
         console.log(orderManager) //데이터쿼리과정에서 비동기화 소요 발생 
         res.status(200).json({
@@ -32,7 +32,7 @@ exports.createOrderCompletion =  async(req, res, next) => {
 
     const msg = req.body.msg
     const orderManager = new OrderManager(req.session.orderManager)
-    orderManager.setMenu()
+    orderManager.initMenu()
     
     if(orderManager.step >= 30){    // 
         orderManager = null
