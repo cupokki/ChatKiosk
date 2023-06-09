@@ -3,12 +3,15 @@ const session = require('express-session');
 
 const cors = require("cors");
 const dotenv = require('dotenv')
-const completionRouter = require('./routers/completion');
+const completionRouter = require('./routes/completion');
+const menuApiRouter = require('./routes/menu');//TODO:
+const voiceApiRouter = require('./routes/voice');
 
 dotenv.config();
 
 const app = express();
   
+// app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }))
@@ -20,10 +23,17 @@ app.use(session({
   cookie: {
     maxAge: 1800000, // 30 minutes
   },
-  
 }));
 
 app.use("/completion", completionRouter);
+app.use("/menu", menuApiRouter);
+app.use("/voice", voiceApiRouter);
+
+app
+  .get("*",(req, res)=>{
+    res.status(404).send("Not Found")
+  })
+
 
 app.listen(process.env.port, ()=>{
   console.log(`Server listening on ${process.env.port}`)

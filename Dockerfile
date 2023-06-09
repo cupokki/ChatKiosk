@@ -2,16 +2,13 @@
 FROM node
 
 # set working directory
-WORKDIR .
-
-# copy package.json and package-lock.json
-COPY package*.json .
-
-# install dependencies
-RUN npm install
+WORKDIR /app
 
 # copy project files
 COPY . .
+
+# install dependencies
+RUN npm install
 
 # start app
 CMD ["npm", "start"]
