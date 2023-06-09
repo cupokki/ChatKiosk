@@ -2,15 +2,16 @@ import sys
 import base64
 
 string = sys.argv[1]
+from gtts import gTTS
 
-# string을 Google Cloud Speech API로 소리파일을 얻어냄
-# 소리파일을 base64로 디코딩
+# test : string = "안녕하세요"
 
-encoded_voice = string
+tts = gTTS(string, lang="ko")
+tts.save('trans.base64')
 
+f = open('trans.base64', 'rb')
+file = f.read()
+f.close()
+result = {"data": file}
 
-result = { "data" : encoded_voice }
-
-# 반환부
-# 표준출력으로 반환 됨
 print(result, end='')
