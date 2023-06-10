@@ -75,25 +75,25 @@ exports.createOrderCompletion = async (req, res, next) => {
 
             // command.execute(order, command)
             switch (command_name) { //execute command 
-                case `i`:
+                case `info`:
                     extra_prompt = command.getInfo(orderManager, args)
                     break
-                case `a`:
+                case `add`:
                     extra_prompt = command.addItem(orderManager, args)
                     //Change State
                     //add command[1]
                     break
-                case `r`:
+                case `rm`:
                     // 제거할때 이거 빼주세요 하고 하지않잖아
                     // 그거 말고 저거 주세요 이런식으로 하지.. 그러니까 바꿀 방법을 생각해야하고
                     // 그렇기 때문에 명령어를 보관할 필요도 있어보인다.
                     // 
                     extra_prompt = command.removeItem(orderManager, args)
                     break
-                case `l`:
+                case `ls`:
                     extra_prompt = command.getCart(orderManager)
                     break
-                case `st`:
+                case `state`:
                     //state transition
                     // o -> p
                     // p -> o  only two case
@@ -102,6 +102,10 @@ exports.createOrderCompletion = async (req, res, next) => {
                 default: // `n`
                     extra_prompt = `you didn't understand. ask to user again`
                     break
+                //undo
+                //redo
+                
+                
             }
         });
 
