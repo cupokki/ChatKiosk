@@ -73,23 +73,21 @@ const Agent = {
 
     extractAssistantCommand: async (orderManager, msg) => {
         // const base_prompt = PromptGenrator.assistantDefaultPrompt()
+        menu = JSON.stringify(orderManager.menu)
         const base_prompt =
-            `
+        `
         Convert context to command.
-            You Must consider conversation.
-            You Must follow example. as short as possible.\
-                if context about order or cancel item-> o id count
-                if context about ask about item info -> i id
-                if context about ask cart(order list) -> l
-                if context about ask how much -> st ${/*ㄴㅇ*/ null}
-                if context about accept previouse request -> y
-                if context about reject previouse request -> n
-                other context  -> -
+        You must follow example. as short as possible.
+            if context is about adding items from orderlist-> add id count
+            if context is about removing items from orderlist-> rm id count
+            if context about ask about item info -> info id
+            if context about ask cart(order list) -> ls
+            other context  -> -
 
-                - If second arg is exist, the arg declare follow list [${menu}]
-                - If second arg is something similar in the menu, use similar one's id.
-       
-                Separate each command with a "/"
+            - If second arg is exist, the arg declare follow list [${menu}]
+            - If the second argument is a similar one from the menu, use the id of the similar one.
+   
+            Separate each command with a "/"
         `
 
         const messages = []
@@ -101,7 +99,11 @@ const Agent = {
                 model: "gpt-3.5-turbo",
                 messages: messages
             })
-
+            content = completion.data.choices[0].message.content
+            commands = content.split("/")
+            console.log("createCMD", completion.data.usage)
+            orderManager.token += completion.data.usage.total_tokens
+            return commands// = [cmd, ...args]
 
         } catch (e) {
             console.log(e)
