@@ -59,7 +59,7 @@ exports.createOrderCompletion = async (req, res, next) => {
             } else {
 
                 orderManager.command_stack.push({ step: orderManager.step, command: element })
-            }
+    }
         })
 
         //현재스탭의 명령어중 accept명령어로 지난 스탭의 명령어 처리
