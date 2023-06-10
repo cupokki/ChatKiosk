@@ -1,9 +1,9 @@
 import sys
 import base64
 import os
+import time
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google-cloud-sdk/tts-key.json"
-
 string = sys.argv[1] #테스트 시 주석
 
 def tts() :
@@ -14,15 +14,7 @@ def tts() :
     #string = "안녕하세요"
 
     tts = gTTS(string, lang="ko")
-    tts.save('trans.base64')
-
-    f = open('trans.base64', 'rb')
-    file = f.read()
-    data = base64.b64encode(file)
-    f.close()
-    result = {"data": data}
-
-    print(result, end='')
+    tts.save('{0}'.format(time.strftime('../temp/%Y-%m-%d-%H%M%S.mp3', time.localtime(time.time()))))
 
 if __name__ == "__main__" :
     tts()
