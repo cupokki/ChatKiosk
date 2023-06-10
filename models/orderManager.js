@@ -24,22 +24,29 @@ class OrderManager {
         }
         this.shop_name = arg.shop_name || null;             // 가게 이름
         this.dialogue = arg.dialogue || [];              // 주문 과정을 기억하여 프롬프트 구성에 활용하기 위함
+        this.command_stack = arg.command_stack || [];
         this.state = arg.state || OrderState.Greet;                 // 주문상태
         this.menu = arg.menu || [];   // 가게의 메뉴판
         this.orders = arg.orders || [];                // 주문의 
         this.step = arg.step || 0;
         this.token = arg.token || 0;
+        
     }
 
     async initMenu(){
         this.menu = await Shop.getMenuNameList(this.shop_id)
+        console.log(this.menu)
     }
 
+    handshake(){
+
+    }
     getFeilds() {
         return {
             shop_id: this.shop_id,          // 가게 식별아이디
             shop_name: this.shop_name,             // 가게 이름
             dialogue: this.dialogue,              // 주문 과정을 기억하여 프롬프트 구성에 활용하기 위함
+            command_stack : this.command_stack,
             state: this.state,                 // 주문상태
             menu: this.menu,                  // 가게의 메뉴판
             orders: this.orders,                // 주문의 
@@ -52,28 +59,5 @@ class OrderManager {
     setState(state){
         this.OrderState = state
     }
-
-    getInfo(menu_id){
-        const info = order.menu.find(menu => menu.id === menu_id)
-        let prompt = info ? info : ``//디폴트 프롬프트에 메뉴에 없는 내용을 안내하지 말라는 것이 있음
-        return `Q: ${menu_id} A: ${prompt}.`
-    }
-
-    orderItem(item_id, count){
-        const item = order.menu.find(item => item.id === item_id)
-
-        if(!item){
-            //there is no item on the menu
-        }
-        if(count === 0){
-            //
-        }
-    }
-    getCartList(){
-
-    }
-    
 }
-
-
 module.exports = OrderManager;

@@ -27,7 +27,7 @@ app.use(session({
   resave: false, // 요청이 왔을 때 세션을 다시 저장할 지 여부를 설정합니다.
   saveUninitialized: true, // 세션이 저장되기 전에 uninitialized 상태로 미리 만들어서 저장합니다.
   cookie: {
-    maxAge: 1800000, // 30 minutes
+    maxAge: 300000, // 5 minutes
   },
 }));
 
