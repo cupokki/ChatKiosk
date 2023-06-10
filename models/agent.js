@@ -14,11 +14,11 @@ const Agent = {
         const base_prompt = `
         Convert context to command.
         You must follow example. as short as possible.
-            if context is about adding items from orderlist-> add id count
-            if context is about removing items from orderlist-> rm id count
-            if context about ask about item info -> info id
-            if context about ask cart(order list) -> ls
-            other context  -> -
+            if context is about asking item info-> info id
+            if context is about asking order list-> ls
+            if context about agree-> yes
+            if context about disagree-> no
+            else -> -
 
             - If second arg is exist, the arg declare follow list [${menu}]
             - If the second argument is a similar one from the menu, use the id of the similar one.
@@ -61,7 +61,7 @@ const Agent = {
 
             content = completion.data.choices[0].message.content
             commands = content.split("/")
-            console.log("createCMD", completion.data.usage)
+            console.log("createUCMD", completion.data.usage)
             orderManager.token += completion.data.usage.total_tokens
             return commands// = [cmd, ...args]
 
@@ -78,17 +78,17 @@ const Agent = {
         `
         Convert context to command.
         You must follow example. as short as possible.
-            if context is about adding items from orderlist-> add id count
-            if context is about removing items from orderlist-> rm id count
-            if context about ask about item info -> info id
-            if context about ask cart(order list) -> ls
-            other context  -> -
-
+            if context is about adding items from orderlist -> add id count
+            if context is about removing items from orderlist -> rm id count
+            if context is about ask again -> ask
+            other context-> -
+            
             - If second arg is exist, the arg declare follow list [${menu}]
             - If the second argument is a similar one from the menu, use the id of the similar one.
-   
+            
             Separate each command with a "/"
-        `
+            `
+            // if context is about state transition-> st paying
 
         const messages = []
         messages.push({ role: "system", content: `${base_prompt}` })
@@ -101,8 +101,9 @@ const Agent = {
             })
             content = completion.data.choices[0].message.content
             commands = content.split("/")
-            console.log("createCMD", completion.data.usage)
+            console.log("createACMD", completion.data.usage)
             orderManager.token += completion.data.usage.total_tokens
+            console.log(commands)
             return commands// = [cmd, ...args]
 
         } catch (e) {
@@ -121,7 +122,7 @@ const Agent = {
         const first_prompt =
             `Role : You're ${"롯데리아"} restaurant order assistant.
              Situation : taking an order
-             OrderState : take order menu
+             OrderState : ${order.state}
              Menu : {${JSON.stringify(order.menu)}}.
              Rule : 
                 1. Never reply unrelated to the order.
@@ -129,11 +130,11 @@ const Agent = {
                 3. Talk only korean.
                 4. You NEVER contain menu list in reply.
                 5. as short as possible.
-                6. Do not ask again.
+                6. Do not ask user's context again.
                 ${manual}
-             
-             ${order.cart ? `Ask if there is anything more to order. and put '(transition)' after the response.` : ``} 
-            `// + cmd==='l'? `cart :  {${JSON.stringify(order.cart)}}.`:""
+                
+                `// + cmd==='l'? `cart :  {${JSON.stringify(order.cart)}}.`:""
+                // ${order.cart ? `Ask if there is anything more to order. and put '(transition)' after the response.` : ``} 
         let test_prompt = first_prompt + extra_prompt
         const messages = [{ role: "system", content: `${test_prompt}` }].concat(order.dialogue)
         messages.push({ role: "user", content: req_msg })

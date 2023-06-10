@@ -111,6 +111,7 @@ exports.createOrderCompletion = async (req, res, next) => {
 
         //TODO : 특정 명령어에만 menu, cart 활성화
         const reply = await agent.createReply(orderManager, msg, extra_prompt)
+        await agent.extractAssistantCommand(orderManager, reply)
 
         //최근 2쌍의 컨텐트만 dialogue에 보관
         if (orderManager.dialogue.length > 3) {
@@ -122,17 +123,16 @@ exports.createOrderCompletion = async (req, res, next) => {
         orderManager.dialogue.push({ role: "assistant", content: reply })
 
         orderManager.step = orderManager.step + 1;
-        console.log(orderManager.step)
         req.session.orderManager = orderManager.getFeilds()
-        // console.log(order.getOrder())
+        
         console.log("orders : ", orderManager.orders)
         console.log("step : ", orderManager.step)
-        res.json({
+        res.json([{
             reply: reply,
             command: commands,
             token: orderManager.token,
             step: orderManager.step
-        })
+        }])
 
     }
     catch (err) {
@@ -142,8 +142,3 @@ exports.createOrderCompletion = async (req, res, next) => {
     }
 };
 
-
-exports.terminateOrder = (req, res, next) => {
-
-
-}
