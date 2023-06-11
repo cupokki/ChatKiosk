@@ -43,9 +43,17 @@ exports.createOrderCompletion = async (req, res, next) => {
         //유저의 커맨드를 추출함
         u_commands = await agent.extractUserCommand(orderManager, msg)//extract command from request message
 
-        orderManager.requested_commands
 
+        //////-------------------------------------------------
+        //ask 제거후 requested_commands의 명령어 실행
+        //완료한 명령어에 저장
+        idx = orderManager.requested_commands.indexOf('ask')
+        if(!idx){
+            a_commands.removeItem(idx)
+            orderManager.requested_commands = a_commands
 
+        }
+        //------------------------------------------------------
         //유저커맨드로 리플 프롬프트 구성
         // u_commands.forEach(element => {
         //     console.log(element)
