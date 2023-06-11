@@ -4,7 +4,7 @@ import io
 import os
 from google.cloud import speech
 
-RECORDFILE = "../source/recordFile.wav"
+RECORDFILE = "../temp/recordFile.mp3"
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google-cloud-sdk/stts-key.json"
 
