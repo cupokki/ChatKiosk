@@ -27,118 +27,129 @@ exports.createOrderSession = async (req, res, next) => {
 exports.createOrderCompletion = async (req, res, next) => {
     try {
         const msg = req.body.msg
+        let u_commands = []
+        let a_commands = []
+        let reply = ''
+        let extra_prompt = ''
         const orderManager = new OrderManager(req.session.orderManager)
         orderManager.initMenu()
 
         if (orderManager.step >= 30) {    // 
             orderManager = null
             req.session.orderManager = null;
-            res.status(400).send(err)
-            // 에러처리
+            res.status(500).send(new Error('Too many steps'))
         }
 
-        let extra_prompt
-        const commands = await agent.extractUserCommand(orderManager, msg)//extract command from request message
-        
+        //유저의 커맨드를 추출함
+        u_commands = await agent.extractUserCommand(orderManager, msg)//extract command from request message
+
+        orderManager.requested_commands
 
 
-        //명령어 적재 및 지난 명령어 처리구문
-        commands.forEach(element => {
-            //빈명령어 제거
-            if (!element)
-                return
+        //유저커맨드로 리플 프롬프트 구성
+        // u_commands.forEach(element => {
+        //     console.log(element)
 
-            if (element === 'y') {
-                // 지난 스텝의 명령어를 수락한다.
-                // 지난 스텝의 명령어를 어떻게 보관할까? 그래고 처리할 스텝의 스코프는? 바로직전만?
-                // 지난 스텝이 불고기버거한개 맞으신가요?
-                
+        //     const command_name = element.shift()
 
-            } else if (element === 'n') {
-                // 지난 스텝의 명령어를 거부한다.
-            } else {
+        //     // command.execute(order, command)
+        //     switch (command_name) { //execute command 
+        //         case `info`:
+        //             extra_prompt = command.getInfo(orderManager, args)
+        //             break
+        //         case `ls`:
+        //             extra_prompt = command.getCart(orderManager)
+        //             break
+        //         case `yes`:
+        //             //직전 명령어를 불러와서
+        //             orderManager.requested_commands.forEach(command => {
+        //                 // a_commands에 push
+        //                 // a_commands.push(element)
+        //             })
+        //             break
+        //         case `no`:
+        //             orderManager.requested_commands = null
+        //             break
+        //         default: // `-`
+        //             // extra_prompt = `you didn't understand. ask to user again`
+        //             break
+        //         //undo
+        //         //redo
 
-                orderManager.command_stack.push({ step: orderManager.step, command: element })
-    }
-        })
 
-        //현재스탭의 명령어중 accept명령어로 지난 스탭의 명령어 처리
-        commands.forEach(element => {
-            // 명령어 중에 허락명령어가 있다면 지난 명령어를 수락한다.
-            element.step
-        })
+        //     }
+        // });
 
-        //이동예정
-        commands.forEach(element => {
-            const args = element.split(" ")
-            const command_name = args.shift()
 
-            // command.execute(order, command)
-            switch (command_name) { //execute command 
-                case `info`:
-                    extra_prompt = command.getInfo(orderManager, args)
-                    break
-                case `add`:
-                    extra_prompt = command.addItem(orderManager, args)
-                    //Change State
-                    //add command[1]
-                    break
-                case `rm`:
-                    // 제거할때 이거 빼주세요 하고 하지않잖아
-                    // 그거 말고 저거 주세요 이런식으로 하지.. 그러니까 바꿀 방법을 생각해야하고
-                    // 그렇기 때문에 명령어를 보관할 필요도 있어보인다.
-                    // 
-                    extra_prompt = command.removeItem(orderManager, args)
-                    break
-                case `ls`:
-                    extra_prompt = command.getCart(orderManager)
-                    break
-                case `state`:
-                    //state transition
-                    // o -> p
-                    // p -> o  only two case
-                    command.transitionState(orderManager, args)
-                    break
-                default: // `n`
-                    extra_prompt = `you didn't understand. ask to user again`
-                    break
-                //undo
-                //redo
-                
-                
+        reply = await agent.createReply(orderManager, msg, extra_prompt)
+        a_commands = await agent.extractAssistantCommand(orderManager, reply)
+        // 명령어 추출에 실패하면 다시 시도하는 로직 필요
+        var idx = a_commands.indexOf('ask');
+        if (!idx) {
+            a_commands.removeItem(idx)
+            orderManager.requested_commands = a_commands
+
+
+        } else {
+            a_commands.forEach(cmd => {
+                const command_name = cmd[0]
+                const args = cmd.copyWithin(1, cmd.length)
+
+
+                // command.execute(order, command)
+                switch (command_name) { //execute command 
+                    case `add`:
+                        extra_prompt = command.addItem(orderManager, args)
+                        //Change State
+                        //add command[1]
+                        break
+                    case `rm`:
+                        // 제거할때 이거 빼주세요 하고 하지않잖아
+                        // 그거 말고 저거 주세요 이런식으로 하지.. 그러니까 바꿀 방법을 생각해야하고
+                        // 그렇기 때문에 명령어를 보관할 필요도 있어보인다.
+                        // 
+                        extra_prompt = command.removeItem(orderManager, args)
+                        break
+                    case `state`:
+                        //state transition
+                        // o -> p
+                        // p -> o  only two case
+                        command.transitionState(orderManager, args)
+                        break
+                    default: // `-`
+
+                        break
+                    //undo
+                    //redo
+
+
+
+                }
+            });
+            //최근 2쌍의 컨텐트만 dialogue에 보관
+            if (orderManager.dialogue.length > 3) {
+                orderManager.dialogue.shift()
+                orderManager.dialogue.shift()
             }
-        });
 
-        //TODO : 특정 명령어에만 menu, cart 활성화
-        const reply = await agent.createReply(orderManager, msg, extra_prompt)
-        await agent.extractAssistantCommand(orderManager, reply)
+            orderManager.dialogue.push({ role: "user", content: msg })//reply생성 위에 존재시 429에러시 문제
+            orderManager.dialogue.push({ role: "assistant", content: reply })
 
-        //최근 2쌍의 컨텐트만 dialogue에 보관
-        if (orderManager.dialogue.length > 3) {
-            orderManager.dialogue.shift()
-            orderManager.dialogue.shift()
+            orderManager.step = orderManager.step + 1;
+            req.session.orderManager = orderManager.getFeilds()
+
+            console.log("step : ", orderManager.step, "orders : ", orderManager.orders)
+            res.json([{
+                reply: reply,
+                command: a_commands,
+                total_token: orderManager.total_token,
+                step: orderManager.step
+            }])
+
         }
-
-        orderManager.dialogue.push({ role: "user", content: msg })//reply생성 위에 존재시 429에러시 문제
-        orderManager.dialogue.push({ role: "assistant", content: reply })
-
-        orderManager.step = orderManager.step + 1;
-        req.session.orderManager = orderManager.getFeilds()
-        
-        console.log("orders : ", orderManager.orders)
-        console.log("step : ", orderManager.step)
-        res.json([{
-            reply: reply,
-            command: commands,
-            token: orderManager.token,
-            step: orderManager.step
-        }])
-
-    }
-    catch (err) {
+    } catch (err) {
         // next(err);
         console.log(err)
         res.status(500).send(err)
     }
-};
-
+}

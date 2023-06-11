@@ -24,12 +24,12 @@ class OrderManager {
         }
         this.shop_name = arg.shop_name || null;             // 가게 이름
         this.dialogue = arg.dialogue || [];              // 주문 과정을 기억하여 프롬프트 구성에 활용하기 위함
-        this.command_stack = arg.command_stack || [];
+        this.requested_commands = arg.command_stack || [];
         this.state = arg.state || OrderState.Greet;                 // 주문상태
         this.menu = arg.menu || [];   // 가게의 메뉴판
         this.orders = arg.orders || [];                // 주문의 
         this.step = arg.step || 0;
-        this.token = arg.token || 0;
+        this.total_token = arg.total_token || 0;
         
     }
 
@@ -46,12 +46,12 @@ class OrderManager {
             shop_id: this.shop_id,          // 가게 식별아이디
             shop_name: this.shop_name,             // 가게 이름
             dialogue: this.dialogue,              // 주문 과정을 기억하여 프롬프트 구성에 활용하기 위함
-            command_stack : this.command_stack,
+            requested_commands : this.requested_commands,
             state: this.state,                 // 주문상태
             menu: this.menu,                  // 가게의 메뉴판
             orders: this.orders,                // 주문의 
             step: this.step,
-            token: this.token
+            total_token: this.total_token
         };
     }
 

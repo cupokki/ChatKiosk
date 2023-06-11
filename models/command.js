@@ -1,3 +1,5 @@
+exports.registry = Object.freeze(["add", "rm", "yes","no","-","st", "ask"])
+
 //명령어 들을 정의
 exports.execute = (command, arguments) =>{
     switch(commmand){
@@ -34,7 +36,7 @@ exports.addItem = (orderManager, arg) => {
         return `There is no menu`
 
     const menu_id = parseInt(arg[0])
-    const count = parseInt(arg[1])
+    const count = arg[1]?parseInt(arg[1]):1
 
     const item = orderManager.menu.find(menu => menu.id === menu_id)
 

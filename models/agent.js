@@ -1,4 +1,5 @@
 const { openai, createCompletion } = require("../utils/openaiApi")
+const Command = require("./command")
 
 const Agent = {
 
@@ -18,7 +19,7 @@ const Agent = {
             if context is about asking order list-> ls
             if context about agree-> yes
             if context about disagree-> no
-            else -> -
+            other context -> -
 
             - If second arg is exist, the arg declare follow list [${menu}]
             - If the second argument is a similar one from the menu, use the id of the similar one.
@@ -30,43 +31,33 @@ const Agent = {
         // 불고기 빼고 감자튀김 주세요
         // TODO: 그냥 어시스턴스의 대답을 추출하자
 
-        const messages = []
-        messages.push({ role: "system", content: `${base_prompt}` })
-        // messages.concat(order.dialogue)
-
-        //이전 메시지가 권유와 관련되었다면? 
-        let context = `Convert context to command  :'${msg}'->`
-        // orderManager.dialogue.forEach(element => {
-        //     if(element.role === 'user'){
-        //         context += `A:` + element.content + '\n'
-        //     }else{
-        //         context += `B:` + element.content + '\n'
-        //     }
-        // });
-        // context += `B : ${msg}\n->`
-        // console.log(context)
-
-        //만약 어시스턴트의 것도 처리한다면 대화 내역을 고려할 필요가 있나?
-
-
-
-        messages.push({ role: "user", content: context })
-        //TODO: 
+        const messages = [
+            { role: "system", content: `${base_prompt}` },
+            { role: "user", content: `Convert context to command  :'${msg}'->` }
+        ]
 
         try {
             const completion = await createCompletion({
-                model: "gpt-3.5-turbo",
+                model: "gpt-3.5-turbo", // 명령어 추출도 상대적으로 성능이 좋은 gpt3.5를 사용하기 위하여
                 messages: messages
             })
+            console.log(Command.registry)
+            const content = completion.data.choices[0].message.content
+            const commands = content.split("/").map( cmd_string => cmd_string.trim())            
+            const vaild_commands = commands.filter(cmd => Command.registry.some(r => cmd.includes(r)))
+            const tokenized_commands = vaild_commands.map(cmd => cmd.split(" "))
 
-            content = completion.data.choices[0].message.content
-            commands = content.split("/")
             console.log("createUCMD", completion.data.usage)
-            orderManager.token += completion.data.usage.total_tokens
-            return commands// = [cmd, ...args]
+            orderManager.total_token += completion.data.usage.total_tokens
+            console.log("c :", content)
+            console.log("c :", commands)
+            console.log("v :", vaild_commands)
+            console.log("t :", tokenized_commands)
+            return [...tokenized_commands]// = [cmd, ...args]
 
         } catch (e) {
             console.log(e)
+            throw new Error('failed to extract user command')
         }
     },
 
@@ -80,7 +71,7 @@ const Agent = {
         You must follow example. as short as possible.
             if context is about adding items from orderlist -> add id count
             if context is about removing items from orderlist -> rm id count
-            if context is about ask again -> ask
+            if context is asking again -> ask
             other context-> -
             
             - If second arg is exist, the arg declare follow list [${menu}]
@@ -88,42 +79,54 @@ const Agent = {
             
             Separate each command with a "/"
             `
-            // if context is about state transition-> st paying
 
-        const messages = []
-        messages.push({ role: "system", content: `${base_prompt}` })
-        messages.push({ role: "user", content: `Convert context to command "${msg}"->` })//.concat(order.dialogue)
-
+        const messages = [
+            { role: "system", content: `${base_prompt}` },
+            { role: "user", content: `Convert context to command "${msg}"->` }
+        ]
         try {
             const completion = await createCompletion({
                 model: "gpt-3.5-turbo",
                 messages: messages
             })
-            content = completion.data.choices[0].message.content
-            commands = content.split("/")
+
+            // var str = "ls -a / cd .. / pwd"; // 두 개 이상의 명령어가 "/"로 구분된 문자열
+            // var commands = str.split("/").map((s) => s.trim()); // "/"기준으로 나누고, 각 요소를 trim하여 명령어 배열 생성
+            // var args = commands.map((c) => c.split(" ")); // 각 명령어를 " "기준으로 나누어 인자배열 생성
+            // console.log(args); // [["ls", "-a"], ["cd", ".."], ["pwd"]]
+
+            const content = completion.data.choices[0].message.content
+            const commands = content.split("/").map( command_string => command_string.trim())            
+            const vaild_commands = commands.filter(cmd => Command.registry.some(r => cmd.includes(r)))
+            const tokenized_commands = vaild_commands.map(commnad => commnad.split(" "))
+
             console.log("createACMD", completion.data.usage)
-            orderManager.token += completion.data.usage.total_tokens
-            console.log(commands)
-            return commands// = [cmd, ...args]
+            orderManager.total_token += completion.data.usage.total_tokens
+            console.log("c :", content)
+            console.log("c :", commands)
+            console.log("v :", vaild_commands)
+            console.log("t :", tokenized_commands)
+            return [...tokenized_commands]// = [cmd, ...args]
 
         } catch (e) {
             console.log(e)
+            throw new Error('failed to extract assistant command')
         }
     },
     /**
      * 평문을 생성함
-     * @param {Order} order
+     * @param {Order} orderManager
      * @param {String} req_msg
      * @param {String} prompt
      * @returns 평문
     */
-    createReply: async (order, req_msg, extra_prompt) => {
+    createReply: async (orderManager, req_msg, extra_prompt) => {
         let manual = `만약 메뉴 추천 요청 시, 기호나 가격대를 되물을 것`
         const first_prompt =
             `Role : You're ${"롯데리아"} restaurant order assistant.
              Situation : taking an order
-             OrderState : ${order.state}
-             Menu : {${JSON.stringify(order.menu)}}.
+             OrderState : ${orderManager.state}
+             Menu : {${JSON.stringify(orderManager.menu)}}.
              Rule : 
                 1. Never reply unrelated to the order.
                 2. You're job is just take order, NOT SERVE ITEM.
@@ -134,9 +137,9 @@ const Agent = {
                 ${manual}
                 
                 `// + cmd==='l'? `cart :  {${JSON.stringify(order.cart)}}.`:""
-                // ${order.cart ? `Ask if there is anything more to order. and put '(transition)' after the response.` : ``} 
+                //TODD: ${order.cart ? `Ask if there is anything more to order. and put '(transition)' after the response.` : ``} 
         let test_prompt = first_prompt + extra_prompt
-        const messages = [{ role: "system", content: `${test_prompt}` }].concat(order.dialogue)
+        const messages = [{ role: "system", content: `${test_prompt}` }].concat(orderManager.dialogue)
         messages.push({ role: "user", content: req_msg })
 
 
@@ -146,15 +149,17 @@ const Agent = {
                 model: "gpt-3.5-turbo",
                 messages: messages
             })
+            const content = completion.data.choices[0].message.content
+
+            console.log("createACMD", completion.data.usage)
+            orderManager.total_token += completion.data.usage.total_tokens
+            return content// = [cmd, ...args]
 
         } catch (e) {
             console.log(e)
-            throw e;
+            throw new Error('failed to create reply')
         }
 
-        console.log("createReply", completion.data.usage)
-        order.token += completion.data.usage.total_tokens
-        return completion.data.choices[0].message.content
     },
 }
 
