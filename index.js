@@ -1,6 +1,7 @@
 const express = require("express");
 const session = require('express-session');
-
+const cookieParser = require('cookie-parser');
+// const bodyParser = require('body-parser');
 const http = require('http')
 const https = require('https')
 const fs = require('fs')
@@ -14,7 +15,6 @@ dotenv.config();
 
 const app = express();
   
-// app.use(bodyParser.json());
 const corsOptions = {
   origin: 'https://localhost:3000', // 허용할 도메인
   credentials: true, // 쿠키 전달 여부
@@ -30,6 +30,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('mysecretkey'));
+// app.use(bodyParser.json());
 app.use(session({
   secret: 'mysecretkey', // 세션 암호화에 사용되는 키 값
   resave: false, // 요청이 왔을 때 세션을 다시 저장할 지 여부를 설정합니다.
