@@ -21,8 +21,8 @@ const corsOptions = {
 };
 
 const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/chatkiosk.hopto.org/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/chatkiosk.hopto.org/fullchain.pem')
+  // key: fs.readFileSync('/etc/letsencrypt/live/chatkiosk.hopto.org/privkey.pem'),
+  // cert: fs.readFileSync('/etc/letsencrypt/live/chatkiosk.hopto.org/fullchain.pem')
 };
 
 // CORS 미들웨어 적용
