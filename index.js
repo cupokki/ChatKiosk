@@ -38,7 +38,8 @@ app.use(session({
   cookie: {
     maxAge: 1800000, // 30 minutes
     sameSite :'none',
-    secure : true
+    secure : true,
+    domain : 'chatkiosk.hopto.org'
   },
 }));
 
