@@ -1,6 +1,7 @@
 const express = require("express");
 const session = require('express-session');
-
+const cookieParser = require('cookie-parser');
+// const bodyParser = require('body-parser');
 const cors = require("cors");
 const dotenv = require('dotenv')
 const completionRouter = require('./routes/completion');
@@ -21,6 +22,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser('mysecretkey'));
 
 app.use(session({
   secret: 'mysecretkey', // 세션 암호화에 사용되는 키 값
@@ -28,6 +30,7 @@ app.use(session({
   saveUninitialized: true, // 세션이 저장되기 전에 uninitialized 상태로 미리 만들어서 저장합니다.
   cookie: {
     maxAge: 300000, // 5 minutes
+
   },
 }));
 
