@@ -4,16 +4,18 @@
 
 
 class PromptGenerator{
-    constructor(){
-        this.defaultPrompt = ``
+    constructor(defaultPrompt){
+        this.defaultPrompt =  defaultPrompt
     }
-    addPrompt();
+    registPrompt(){
+
+    }
+    generatePrompt(){
+
+    }
     
 }
 
 prompt = new Prompt()
 
 prompt.register('')
-
-
-PromptRegister.addCart(prompt, order)
