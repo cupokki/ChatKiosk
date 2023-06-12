@@ -102,7 +102,7 @@ exports.createOrderCompletion = async (req, res, next) => {
             // Order상태이면서, 주문한게 있다면 결제할지 물어본다.
             switch(orderManager.state){
                 case "Order":
-                    if(orderManager.orders){
+                    if(orderManager.orders.length > 0){
                         result.push({
                             reply : "더 주문하실 것이 없으시면 결제를 도와드려도 될까요?",//추후에 컴플리션으로
                             command : [["state", "Paying"],["ask"]]
@@ -111,8 +111,8 @@ exports.createOrderCompletion = async (req, res, next) => {
                     break
                 case "Paying":
                     result.push({
-                        reply : "더 주문하실 것이 없으시면 결제를 도와드려도 될까요?",//추후에 컴플리션으로
-                        command : [["state", "Done"],["ask"]]
+                        reply : "주문이 완료되었습니다.",//추후에 컴플리션으로
+                        command : [["Done"]]
                     })
                     break
                 default:
