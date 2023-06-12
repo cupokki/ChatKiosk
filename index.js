@@ -37,7 +37,8 @@ app.use(session({
   saveUninitialized: true, // 세션이 저장되기 전에 uninitialized 상태로 미리 만들어서 저장합니다.
   cookie: {
     maxAge: 1800000, // 30 minutes
-    sameSite:none
+    sameSite :'none',
+    secure : true
   },
 }));
 
