@@ -1,7 +1,9 @@
 const agent = require("../models/agent")
 const OrderManager = require("../models/orderManager")
+const {OrderState} = require("../models/orderManager")
 const Shop = require("../models/shop")
 const command = require("../models/command")
+const { createPool } = require("mysql2")
 
 exports.createOrderSession = async (req, res, next) => {
     let shop_id, shop_name;
@@ -32,6 +34,7 @@ exports.createOrderCompletion = async (req, res, next) => {
         let commands = []
         let reply = ''
         let extra_prompt = ''
+        let result =[]
         const orderManager = new OrderManager(req.session.orderManager)
         orderManager.initMenu()
 
@@ -90,17 +93,37 @@ exports.createOrderCompletion = async (req, res, next) => {
 
         // 명령어 추출에 실패하면 다시 시도하는 로직 필요
         let idx = a_commands.indexOf('ask');
-        if (!idx) {
-            a_commands.removeItem(idx)
+        console.log(idx)
+        if (idx !== -1) { // ask가 있음
+            a_commands.slice(idx,1)
             orderManager.requested_commands = a_commands
+            a_commands = []
+        }else if(idx === -1 && orderManager.state==="Order"){// 주문관련 ask가 없다면, 상태변경 ask를 보낸다.
+            // Order상태이면서, 주문한게 있다면 결제할지 물어본다.
+            switch(orderManager.state){
+                case "Order":
+                    if(orderManager.orders){
+                        result.push({
+                            reply : "더 주문하실 것이 없으시면 결제를 도와드려도 될까요?",//추후에 컴플리션으로
+                            command : [["state", "Paying"],["ask"]]
+                        })
+                    }
+                    break
+                case "Paying":
+                    result.push({
+                        reply : "더 주문하실 것이 없으시면 결제를 도와드려도 될까요?",//추후에 컴플리션으로
+                        command : [["state", "Done"],["ask"]]
+                    })
+                    break
+                default:
+                    break
+            
+            }
         }
-
         commands = [...commands, ...a_commands]
-
         commands.forEach(cmd => {
             const command_name = cmd[0]
-            const args = cmd.copyWithin(1, cmd.length)
-
+            const args = cmd.slice(1)
 
             // command.execute(order, command)
             switch (command_name) { //execute command 
@@ -116,16 +139,13 @@ exports.createOrderCompletion = async (req, res, next) => {
                     // 
                     extra_prompt = command.removeItem(orderManager, args)
                     break
-                case `state`:
-                    //state transition
-                    // o -> p
-                    // p -> o  only two case
-                    command.transitionState(orderManager, args)
+                case 'state':
+                    orderManager.state = args[0]
                     break
                 default: // `-`
 
                     break
-                //undo
+                  //undo
                 //redo
 
 
@@ -145,12 +165,16 @@ exports.createOrderCompletion = async (req, res, next) => {
         req.session.orderManager = orderManager.getFeilds()
 
         console.log("step : ", orderManager.step, "orders : ", orderManager.orders)
-        res.json([{
+        result.unshift ({
             reply: reply,
-            command: a_commands,
-            total_token: orderManager.total_token,
-            step: orderManager.step
-        }])
+            commands: commands
+        })
+        res.json({
+            step : orderManager.step,
+            current_state : orderManager.state,
+            total_token : orderManager.total_token,
+            result : result
+        })
 
 
     } catch (err) {
