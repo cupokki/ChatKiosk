@@ -3,7 +3,7 @@ const router = express.Router();
 
 const voiceService = require("../services/voiceService");
 
-router.route("/stt").get(voiceService.stt);
-router.route("/tts").get(voiceService.tts);
+router.route("/stt").post(voiceService.stt);
+router.route("/tts").post(voiceService.tts);
 
 module.exports = router;

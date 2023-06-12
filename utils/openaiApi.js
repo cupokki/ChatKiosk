@@ -21,6 +21,7 @@ exports.createCompletion = async (args) => {
   let i = 1;
   let max = 10;
   while (i < max) {
+    
     try {
       const completion = await pool[pool_pointer % pool.length].createChatCompletion({
         model: args.model,//"gpt-3.5-turbo",

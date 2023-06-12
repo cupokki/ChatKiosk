@@ -37,6 +37,10 @@
 ```docker-compose run```: docker compose 파일에 정의된 특정 서비스를 실행하고 명령어를 수행합니다. 예를 들어, docker-compose run service1 bash는 service1 컨테이너에서 bash 셸을 실행합니다.
 ```docker-compose start / stop / restart```: docker compose 파일에 정의된 모든 서비스를 시작 / 중지 / 재시작합니다.
 ```docker-compose rm```: docker compose 파일에 정의된 모든 서비스를 삭제합니다.
+
+
+쿠버네티스 - CICD
+
 ## 토큰절약
  1.ID생성
  2. API 두개사용
@@ -85,3 +89,67 @@ Order의 lifecycle을 위한 State
 
 
    
+
+- 유저의 대화를 입력받는다.
+   - 유저의 대화를 해석해 생성에 필요한 해석해 정보를 준비하는과정이 필요하다. 
+      -> ls, info
+   - 이전 명령어에 대한 동의를 구한다.
+- 유저의 대화에 대한 어시스턴트의 답변을 생성한다.
+- 어시스턴트의 동작을 명령어화한다.
+   -> add, remove
+   - 되묻는 말이면 해당 명령어에 대한 유저의 동의를 구해야 명령어가 적용될것이다.
+   - 마찬가지로 _"어느정도"_주문이 완료되면 다음단계(결제)로 넘어갈지 물어야한다. 조건은?
+
+_직전 스텝의 명령어를 보관할 필요가 있다._
+
+-> 유저 명령 추출과 어시스턴트명령 추출은 프롬프트가 달라야한다.(정의된 명령어셋이다르다.)
+-> 이를 해석하기 위한 switch 문도 별개이다.
+
+
+#1
+```
+ Convert context to command.
+        You must follow example. as short as possible.
+            if context is about adding items from orderlist-> add id count
+            if context is about removing items from orderlist-> rm id count
+            if context about ask about item info -> info id
+            if context about ask cart(order list) -> ls
+            other context  -> -
+
+            - If second arg is exist, the arg declare follow list [${menu}]
+            - If the second argument is a similar one from the menu, use the id of the similar one.
+   
+            Separate each command with a "/"
+```
+
+user
+```
+ Convert context to command.
+        You must follow example. as short as possible.
+            if context is about asking item info->info id
+            if context is about asking order list->ls
+            if context about agree->yes
+            if context about disagree->no
+            other context->-
+
+            - If second arg is exist, the arg declare follow list [${menu}]
+            - If the second argument is a similar one from the menu, use the id of the similar one.
+   
+            Separate each command with a "/"
+```
+
+
+assistamt
+```
+ Convert context to command.
+        You must follow example. as short as possible.
+            if context is about adding items from orderlist->add id count
+            if context is about removing items from orderlist->rm id count
+            if context is about state transition->st paying
+            other context->-
+
+            - If second arg is exist, the arg declare follow list [${menu}]
+            - If the second argument is a similar one from the menu, use the id of the similar one.
+   
+            Separate each command with a "/"
+```
