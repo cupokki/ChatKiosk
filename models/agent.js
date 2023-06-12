@@ -123,7 +123,7 @@ const Agent = {
     createReply: async (orderManager, req_msg, extra_prompt) => {
         let manual = `만약 메뉴 추천 요청 시, 기호나 가격대를 되물을 것`
         const first_prompt =
-            `Role : You're ${"롯데리아"} restaurant order assistant.
+            `Role : You're ${"롯데리아"} restaurant order assistant. 
              Situation : taking an order
              OrderState : ${orderManager.state}
              Menu : {${JSON.stringify(orderManager.menu)}}.
