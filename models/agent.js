@@ -68,16 +68,20 @@ const Agent = {
         const base_prompt =
         `
         Convert context to command.
-        You must follow example. as short as possible.
+        Command declare follow name list [add, rm, ask]
+        Each command must start with a command name in name list.
+        Command can be mutiple. Separate each command with a "/"
+        If second arg is exist, the arg declare follow list [${menu}]
+        If the second argument is a similar one from the menu, use the id of the similar one.
+        When you convert, follow example
             if context is about adding items from orderlist -> add id count
             if context is about removing items from orderlist -> rm id count
-            if context is asking again -> ask
-            other context-> -
+            if context is asking for agreement-> ask
+                Command "ask" cannot exist alone.
+
+            other context -> -
             
-            - If second arg is exist, the arg declare follow list [${menu}]
-            - If the second argument is a similar one from the menu, use the id of the similar one.
             
-            Separate each command with a "/"
             `
 
         const messages = [
@@ -133,7 +137,8 @@ const Agent = {
                 3. Talk only korean.
                 4. You NEVER contain menu list in reply.
                 5. as short as possible.
-                6. Do not ask user's context again.
+                6. You must check the menu
+                7. Don't ask if there is anything else to order.
                 ${manual}
                 
                 `// + cmd==='l'? `cart :  {${JSON.stringify(order.cart)}}.`:""

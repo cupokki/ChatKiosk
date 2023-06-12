@@ -3,12 +3,12 @@ const Shop = require("./shop")
 /**
  * 주문 상태를 정의함
  */
-const OrderState = Object.freeze({
-    Greet : "Greet",      // 초기상태
-    Order : "Order",      // 주문중    Paying 상태로 전이하기 위해서 오퍼레이션이 필요함
-    Paying: "Paying",     // 결제
-    Done : "Done"        // 완료된 주문
-})
+const OrderState = {
+    Greet : "Greet",      //"Greet",      // 초기상태
+    Order : "Order",      //"Order",      // 
+    Paying : "Paying",    //"Paying",     // 
+    Done : "Done"//"Done"        // 
+}
 //when Greet : 고객응대 메뉴얼을 프롬에 삽입
 
 class OrderManager {
@@ -25,7 +25,7 @@ class OrderManager {
         this.shop_name = arg.shop_name || null;             // 가게 이름
         this.dialogue = arg.dialogue || [];              // 주문 과정을 기억하여 프롬프트 구성에 활용하기 위함
         this.requested_commands = arg.command_stack || [];
-        this.state = arg.state || OrderState.Greet;                 // 주문상태
+        this.state = arg.state || OrderState.Order;                 // 주문상태
         this.menu = arg.menu || [];   // 가게의 메뉴판
         this.orders = arg.orders || [];                // 주문의 
         this.step = arg.step || 0;
