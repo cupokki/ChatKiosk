@@ -18,9 +18,6 @@ const corsOptions = {
   credentials: true, // 쿠키 전달 여부
 };
 
-const options = {
-};
-
 // CORS 미들웨어 적용
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -47,10 +44,6 @@ app
   })
 
 
-// app.listen(process.env.port, ()=>{
-//   console.log(`Server listening on ${process.env.port}`)
-// });
-
-https.createServer(options, app).listen(process.env.port, ()=>{
+app.listen(process.env.port, ()=>{
   console.log(`Server listening on ${process.env.port}`)
 });
