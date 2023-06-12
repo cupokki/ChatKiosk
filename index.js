@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require('express-session');
+
 const http = require('http')
 const https = require('https')
 const fs = require('fs')
@@ -28,7 +29,7 @@ const options = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
-
+app.use(cookieParser('mysecretkey'));
 app.use(session({
   secret: 'mysecretkey', // 세션 암호화에 사용되는 키 값
   resave: false, // 요청이 왔을 때 세션을 다시 저장할 지 여부를 설정합니다.
