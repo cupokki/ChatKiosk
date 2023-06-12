@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
 const http = require('http')
 const https = require('https')
@@ -16,13 +17,11 @@ const app = express();
   
 // app.use(bodyParser.json());
 const corsOptions = {
-  origin: 'https://localhost:3000', // 허용할 도메인
+  origin: 'http://localhost:3000', // 허용할 도메인
   credentials: true, // 쿠키 전달 여부
 };
 
 const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/chatkiosk.hopto.org/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/chatkiosk.hopto.org/fullchain.pem')
 };
 
 // CORS 미들웨어 적용
