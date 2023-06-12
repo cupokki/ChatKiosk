@@ -12,12 +12,10 @@ dotenv.config();
 
 const app = express();
   
+// app.use(bodyParser.json());
 const corsOptions = {
   origin: 'http://localhost:3000', // 허용할 도메인
   credentials: true, // 쿠키 전달 여부
-};
-
-const options = {
 };
 
 // CORS 미들웨어 적용
@@ -46,10 +44,6 @@ app
   })
 
 
-// app.listen(process.env.port, ()=>{
-//   console.log(`Server listening on ${process.env.port}`)
-// });
-
-https.createServer(options, app).listen(process.env.port, ()=>{
+app.listen(process.env.port, ()=>{
   console.log(`Server listening on ${process.env.port}`)
 });
