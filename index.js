@@ -2,6 +2,7 @@ const express = require("express");
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 // const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
 const cors = require("cors");
 const dotenv = require('dotenv')
 const completionRouter = require('./routes/completion');
@@ -23,6 +24,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser('mysecretkey'));
+app.use(fileUpload());
 
 app.use(session({
   secret: 'mysecretkey', // 세션 암호화에 사용되는 키 값

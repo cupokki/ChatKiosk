@@ -1,21 +1,38 @@
-const { readSync } = require('fs');
-
 const spawn = require('child_process').spawn;
 
 exports.stt = (req, res) => {
     //디렉터리 위치가 index기준임
     //TODO: temp
-    const encoded_voice = req.body.encoded_voice
-    const child = spawn('python3', ['./utils/python/stt.py', encoded_voice]);
-    let string = ''
+    if(!req.files){
+        res.status(400).json({
+            message : 'No files were uploaded'
+        })
+    }
+    console.log(req.files.file)
+    
+    const child = spawn('python3', ['./utils/python/stt.py']);
+    let result = ''
     child.stdout.on('data', (chunk) => {
-        string += chunk.toString();
+        result += chunk.toString();
 
     })
+    child.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+      });
+      console.log(1)
+    child.stdin.write(req.files.file.data);
+    // child.stdin.write("test");
+    child.stdin.end();
+    console.log(2)
     child.on('close', (code) => {
+        console.log(3)
+        console.log(result)
         if (code === 0) { // 0 : 정상
-            string = string.replace(/'/g, '"')
-            res.json(JSON.parse(string));
+            result = result.replace(/'/g, '"')
+            
+            res.json({
+                string : result
+            });
         } else {
             res.status(500).json({
                 message: 'Internal Server Error',
@@ -28,14 +45,19 @@ exports.tts = (req, res) => {
     //디렉터리 위치가 index기준임
     const string = req.body.string
     const child = spawn('python3', ['./utils/python/tts.py', string]);
-    let encoded_voice = ''
+    let result = ''
     child.stdout.on('data', (chunk) => {
-        encoded_voice += chunk.toString();
+        result += chunk.toString();
     })
+    child.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+      });
     child.on('close', (code) => {
         if (code === 0) { // 0 : 정상
-            encoded_voice = encoded_voice.replace(/'/g, '"')
-            res.json(JSON.parse(encoded_voice)); 
+            result = result.replace(/'/g, '"')
+            res.json({
+                file_name : result
+            }); 
         } else {
             res.status(500).json({
                 message: 'Internal Server Error',

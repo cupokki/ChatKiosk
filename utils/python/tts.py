@@ -1,16 +1,22 @@
 import sys
 import base64
+import os
+import time
 
-string = sys.argv[1]
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google-cloud-sdk/tts-key.json"
+string = sys.argv[1] #테스트 시 주석
 
-# string을 Google Cloud Speech API로 소리파일을 얻어냄
-# 소리파일을 base64로 디코딩
+def tts() :
 
-encoded_voice = string
+    from gtts import gTTS
 
+    # # Test Code
+    # #string = "안녕하세요"
 
-result = { "data" : encoded_voice }
+    tts = gTTS(string, lang="ko")
+    file_name = '{0}'.format(time.strftime('%Y-%m-%d-%H%M%S.mp3', time.localtime(time.time())))
+    tts.save('./utils/temp/' + file_name)
+    print(file_name, end='')
 
-# 반환부
-# 표준출력으로 반환 됨
-print(result, end='')
+if __name__ == "__main__" :
+    tts()
