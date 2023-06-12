@@ -41,7 +41,6 @@ app.use(session({
     httpOnly : false,
     sameSite :'none',
     secure : true,
-    domain : 'chatkiosk.hopto.org'
   },
 }));
 
