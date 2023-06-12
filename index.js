@@ -15,7 +15,7 @@ const app = express();
   
 // app.use(bodyParser.json());
 const corsOptions = {
-  origin: 'https://localhost:3000', // 허용할 도메인
+  origin: 'https://chatkiosk.hopto.org', // 허용할 도메인
   credentials: true, // 쿠키 전달 여부
 };
 
