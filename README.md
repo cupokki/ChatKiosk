@@ -1,4 +1,5 @@
-#ChatKiosk backend
+# ChatKiosk backend
+[최종결과 발표자료.pdf](https://github.com/user-attachments/files/24422915/default.pdf)
 
 도커사용권장
 
